@@ -359,6 +359,7 @@
       armL.rotation.x = armR.rotation.x = -.5;
     }
     g.userData = { body, headG, armL, armR, jug, lvl, footL, footR, sit: o.sit };
+    if (o.real) { g.userData.rk = o.real; REAL_OBJS.push(g); }
     return shade(g);
   }
 
@@ -436,6 +437,68 @@
     return on;
   }
 
+  // ------- باقي الناس الواقعيين: كل شخصية لها ملف بعظامها وحركاتها (مشي، وقوف، جلسة) -------
+  // ينزل الملف أول ما تظهر الشخصية، وإلى ما يوصل تبقى المبسّطة
+  const PEOPLE = {}, REAL_OBJS = [];
+  function personGLB(key) {
+    if (PEOPLE[key]) return PEOPLE[key].g;
+    PEOPLE[key] = { g: null };
+    if (!THREE.GLTFLoader || !THREE.SkeletonUtils) return null;
+    try {
+      new THREE.GLTFLoader().load("assets/" + key + ".glb", g => {
+        g.animations.forEach(c => c.tracks.forEach(tr => {
+          if (!/Hips\.position$/.test(tr.name)) return;
+          const v = tr.values, x0 = v[0], z0 = v[2];
+          for (let i = 0; i < v.length; i += 3) { v[i] = x0; v[i + 2] = z0; }
+        }));
+        PEOPLE[key].g = g;
+      }, undefined, () => {});
+    } catch (e) {}
+    return null;
+  }
+  function realize(m, G) {
+    const u = m.userData, s = THREE.SkeletonUtils.clone(G.scene);
+    s.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; } });
+    m.add(s); m.updateMatrixWorld(true);
+    // الطول: الراس على ١٫٥٨ للرجال و١٫٥ للحريم
+    const head = s.getObjectByName("Head"), front = s.getObjectByName("headfront");
+    const _w = V(0, 0, 0), _q = new THREE.Quaternion(), _s = V(1, 1, 1);
+    m.matrixWorld.decompose(_w, _q, _s);
+    const hy = head ? head.getWorldPosition(V(0, 0, 0)).sub(_w).y / _s.y : 1.58;
+    const sc = clamp((u.woman ? 1.5 : 1.58) / Math.max(.5, hy), .75, 1.3);
+    s.scale.multiplyScalar(sc); m.updateMatrixWorld(true);
+    if (head && front) { const a = m.worldToLocal(head.getWorldPosition(V(0, 0, 0))), b = m.worldToLocal(front.getWorldPosition(V(0, 0, 0))); if (b.z < a.z) s.rotation.y = Math.PI; }
+    const mixer = new THREE.AnimationMixer(s), acts = {};
+    const pick = re => G.animations.find(c => re.test(c.name));
+    [["walk", /walk/i], ["idle", /^(?!.*(sit|chair)).*idle/i], ["sit", /sit|chair/i]].forEach(([k, re]) => {
+      const c = pick(re); if (!c) return; const a = mixer.clipAction(c); a.play(); a.setEffectiveWeight(0); a.time = Math.random() * c.duration; acts[k] = a;
+    });
+    u.rl = { s, sc, mixer, acts, w: {}, last: m.position.clone(), v: 0 };
+  }
+  function realTick(dt) {
+    for (let i = REAL_OBJS.length - 1; i >= 0; i--) {
+      const m = REAL_OBJS[i], u = m.userData;
+      // اللي انشال من المشهد نتركه بعد شوي
+      if (!m.parent) { u.orphan = (u.orphan || 0) + dt; if (u.orphan > 4) REAL_OBJS.splice(i, 1); continue; }
+      u.orphan = 0;
+      const G = personGLB(u.rk); if (!G) continue;
+      // إذا بيده شي (دلة، جوال، فناجيل) نخليه بالشكل المبسّط عشان يبان الشي اللي بيده
+      const props = u.armL.children.length > 2 || u.armR.children.length > 2;
+      if (!u.rl) { if (props) continue; realize(m, G); }
+      const R = u.rl, on = !props;
+      R.s.visible = on; u.body.visible = !on;
+      const sp = Math.hypot(m.position.x - R.last.x, m.position.z - R.last.z) / Math.max(dt, 1e-3); R.last.copy(m.position);
+      if (!on) continue;
+      R.v = lerp(R.v, Math.min(sp, 8), Math.min(1, dt * 6));
+      const mode = u.sit && R.acts.sit ? "sit" : R.v > .35 || !R.acts.idle ? "walk" : "idle";
+      for (const k in R.acts) { R.w[k] = lerp(R.w[k] == null ? (k === mode ? 1 : 0) : R.w[k], k === mode ? 1 : 0, Math.min(1, dt * 5)); R.acts[k].setEffectiveWeight(R.w[k]); }
+      if (R.acts.walk) R.acts.walk.timeScale = mode === "walk" ? clamp(R.v / 1.5, .4, 2.6) : 1;
+      R.mixer.update(dt);
+      // الجالس على كرسي: نرجّع الرجلين للأرض
+      R.s.position.y = -.065 * R.sc - (mode === "sit" ? (u.lift || 0) : 0);
+    }
+  }
+
   // ------- ملامح الوجه: عيون وحواجب وخشم وشنب -------
   const EYE_W = M("#f4efe6", { roughness: .4 }), EYE_D = M("#1a1210", { roughness: .2 }), BROW = M("#1d1612", { roughness: 1 }), LIP = M("#7a4436", { roughness: .8 });
   function addFace(h, skinM, o) {
@@ -448,6 +511,115 @@
     const nose = new THREE.Mesh(new THREE.ConeGeometry(.02, .065, 8), M("#a8704a", { roughness: .7 })); nose.rotation.x = Math.PI / 2 + .35; nose.position.set(0, .115 + y, .128 + z); h.add(nose);
     const mouth = new THREE.Mesh(new THREE.BoxGeometry(.045, .01, .012), LIP); mouth.position.set(0, .07 + y, .117 + z); h.add(mouth);
     if (o.beard) { const mu = new THREE.Mesh(new THREE.BoxGeometry(.07, .018, .022), M(o.beard, { roughness: 1 })); mu.position.set(0, .085 + y, .12 + z); h.add(mu); }
+  }
+
+  // ------- الناقة الواقعية: مجسّم ثابت نركّب له عظام هنا (أرجل بركبتين، رقبة وراس، وذيل) -------
+  // المجسّم الأصلي: الراس على +z، والأرض على أقل y. نقلبه عشان الراس يصير على -z مثل الناقة المبسّطة
+  const CAMEL_S = 1.6;
+  function camelKit(gl) {
+    let src = null; gl.scene.updateMatrixWorld(true); gl.scene.traverse(o => { if (o.isMesh && !src) src = o; });
+    const geo = src.geometry.clone(); geo.applyMatrix4(src.matrixWorld); geo.computeBoundingBox();
+    const bb = geo.boundingBox, H = bb.max.y - bb.min.y, k = 1.37 / H;
+    const pos = geo.attributes.position, n = pos.count;
+    // نحسب كل شي بمقياس الأصل: h الارتفاع من الأرض، z للقدام (الراس)
+    const P = i => [pos.getX(i) * k, (pos.getY(i) - bb.min.y) * k, pos.getZ(i) * k];
+    // مكان الأرجل الأربع من النقاط القريبة من الأرض
+    const legC = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    let zMin = 1e9, zMax = -1e9;
+    for (let i = 0; i < n; i++) { const p = P(i); if (p[1] < .3) { zMin = Math.min(zMin, p[2]); zMax = Math.max(zMax, p[2]); } }
+    const zSplit = (zMin + zMax) / 2;
+    const quad = p => (p[2] > zSplit ? 0 : 2) + (p[0] > 0 ? 1 : 0); // 0,1 قدّام  2,3 ورا
+    for (let i = 0; i < n; i++) { const p = P(i); if (p[1] < .3) { const c = legC[quad(p)]; c[0] += p[0]; c[1] += p[2]; c[2]++; } }
+    legC.forEach(c => { c[0] /= Math.max(1, c[2]); c[1] /= Math.max(1, c[2]); });
+    const HIP = .7, KNEE = [.36, .36, .4, .4];
+    // العظام بإحداثيات اللعبة: (x,h,z) الأصل → (-x,h,-z) × المقياس
+    const G = (x, h, z) => V(-x * CAMEL_S, h * CAMEL_S, -z * CAMEL_S);
+    const neckZ = legC[0][1] + .14, bodyZ = (legC[0][1] + legC[2][1]) / 2;
+    const J = {
+      root: G(0, HIP, bodyZ),
+      legs: legC.map((c, i) => ({ hip: G(c[0], HIP, c[1]), knee: G(c[0], KNEE[i], c[1]) })),
+      neck: G(0, .9, neckZ), head: G(0, 1.2, neckZ + .42), tail: G(0, .95, zMin + .04)
+    };
+    // أوزان الجلد: كل نقطة تتبع لين أربع عظام
+    // ترتيب العظام: 0 جسم، 1-4 فخوذ، 5-8 سيقان، 9 رقبة، 10 راس، 11 ذيل
+    const si = new Uint16Array(n * 4), sw = new Float32Array(n * 4);
+    for (let i = 0; i < n; i++) {
+      const p = P(i), h = p[1], z = p[2], w = [];
+      const q = quad(p), c = legC[q];
+      // الرجل: قريبة من مركزها وتحت البطن
+      const near = 1 - smooth(.09, .16, Math.hypot(p[0] - c[0], z - c[1]));
+      const leg = (1 - smooth(.56, .74, h)) * near;
+      const low = smooth(KNEE[q] + .07, KNEE[q] - .07, h);
+      // الرقبة والراس قدّام فوق
+      const nk = smooth(neckZ - .1, neckZ + .06, z) * smooth(.62, .8, h) * (1 - leg);
+      const hd = smooth(neckZ + .3, neckZ + .42, z);
+      const tl = smooth(zMin + .1, zMin + .02, z) * smooth(.55, .8, h) * (1 - leg);
+      const body = Math.max(0, 1 - leg - nk - tl);
+      w.push([0, body], [1 + q, leg * (1 - low)], [5 + q, leg * low], [9, nk * (1 - hd)], [10, nk * hd], [11, tl]);
+      w.sort((a, b) => b[1] - a[1]);
+      let s = 0; for (let j = 0; j < 4; j++) s += w[j][1];
+      for (let j = 0; j < 4; j++) { si[i * 4 + j] = w[j][0]; sw[i * 4 + j] = s > 0 ? w[j][1] / s : (j ? 0 : 1); }
+    }
+    // نحوّل الشكل لإحداثيات اللعبة
+    geo.translate(0, -bb.min.y, 0); geo.scale(k * CAMEL_S, k * CAMEL_S, k * CAMEL_S); geo.rotateY(Math.PI);
+    geo.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(si, 4));
+    geo.setAttribute("skinWeight", new THREE.Float32BufferAttribute(sw, 4));
+    geo.computeBoundingSphere();
+    src.material.skinning = true;
+    return { geo, mat: src.material, J };
+  }
+  function camelReal(kit, hideCol) {
+    const J = kit.J, B = () => new THREE.Bone();
+    const root = B(); root.position.copy(J.root);
+    const at = (b, parent, wp, pwp) => { b.position.copy(wp).sub(pwp); parent.add(b); return b; };
+    const ups = [], lows = [];
+    J.legs.forEach(l => { const u = at(B(), root, l.hip, J.root); ups.push(u); lows.push(at(B(), u, l.knee, l.hip)); });
+    const neck = at(B(), root, J.neck, J.root), head = at(B(), neck, J.head, J.neck), tail = at(B(), root, J.tail, J.root);
+    const bones = [root, ...ups, ...lows, neck, head, tail];
+    let mat = kit.mat;
+    if (hideCol) { mat = kit.mat.clone(); mat.skinning = true; const a = new THREE.Color(hideCol), b = new THREE.Color("#c4955c"); mat.color = new THREE.Color(clamp(a.r / b.r, .4, 1.3), clamp(a.g / b.g, .4, 1.3), clamp(a.b / b.b, .4, 1.3)); }
+    const mesh = new THREE.SkinnedMesh(kit.geo, mat);
+    mesh.add(root); mesh.updateMatrixWorld(true);
+    mesh.bind(new THREE.Skeleton(bones));
+    mesh.castShadow = true; mesh.receiveShadow = true; mesh.frustumCulled = false;
+    const rest = J.root.clone(), hipH = J.root.y, frontZ = J.legs[0].hip.z, backZ = J.legs[2].hip.z;
+    // الوقفة: stand ٠ باركة و١ واقفة. القومة: المؤخرة أول ثم المقدمة، والبروك بالعكس
+    function pose(stand, headUp, walk, t) {
+      const fr = smooth(.42, 1, stand), bk = smooth(0, .6, stand);
+      const dropF = (1 - fr) * hipH * .8, dropB = (1 - bk) * hipH * .8;
+      root.position.set(rest.x, rest.y - (dropF + dropB) / 2, rest.z);
+      root.rotation.x = -Math.atan2(dropF - dropB, Math.abs(backZ - frontZ));
+      ups.forEach((u, i) => {
+        const front = i < 2, f = front ? fr : bk;
+        // المشي: الناقة ترفع رجلين من نفس الجهة مع بعض
+        const side = i % 2 ? 0 : Math.PI, ph = walk ? walk + side : 0;
+        const sw = walk ? Math.sin(ph) * .32 * f : 0, lift = walk ? Math.max(0, Math.cos(ph)) * .55 * f : 0;
+        u.rotation.x = (1 - f) * (front ? 1.25 : -1.05) - root.rotation.x * f + sw;
+        lows[i].rotation.x = (1 - f) * (front ? -2.75 : 2.55) + (front ? -lift : lift);
+      });
+      const bob = walk ? Math.sin(walk * 2) * .04 : 0;
+      neck.rotation.x = -(1 - headUp) * .75 + Math.sin((t || 0) * 1.1) * .03 + bob - root.rotation.x * .6;
+      head.rotation.x = (1 - headUp) * .35;
+      tail.rotation.x = Math.sin((t || 0) * 2.3) * .12;
+    }
+    return { mesh, pose, root, head };
+  }
+
+  // كل النوق: إذا وصل المجسّم الواقعي تتبدّل له، وإلا تبقى المبسّطة
+  let CAMEL_KIT = null; const CAMELS = [];
+  function camelUp(g) {
+    const u = g.userData; if (u.real || !CAMEL_KIT) return;
+    const R = camelReal(CAMEL_KIT, u.hideCol); g.add(R.mesh); u.rig.visible = false; u.real = R; u.seatY = 2.05; u.seatZ = .45;
+    if (u.mark) {
+      // الوسم على الفخذ يتحرّك مع الجسم
+      const bm = new THREE.MeshStandardMaterial({ map: brandTex(u.mark), transparent: true, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, depthWrite: false });
+      [-1, 1].forEach(sd => { const p = new THREE.Mesh(new THREE.PlaneGeometry(.3, .3), bm); p.position.set(sd * .3, .12, .5); p.rotation.y = sd * Math.PI / 2; R.root.add(p); });
+    }
+    R.pose(u.pose.stand, u.pose.headUp, 0, 0);
+  }
+  function loadCamel() {
+    if (!THREE.GLTFLoader) return;
+    try { new THREE.GLTFLoader().load("assets/camel.glb", gl => { CAMEL_KIT = camelKit(gl); CAMELS.forEach(camelUp); }, undefined, () => {}); } catch (e) {}
   }
 
   // ------- الناقة: ترتفع عند السنام قرابة مترين، وتقدر تبرك وتقوم -------
@@ -496,9 +668,12 @@
       });
       neckPiv.rotation.x = -(1 - headUp) * .85 + Math.sin(performance.now() / 900) * .03;
     }
-    g.userData = { setPose, pose, head };
+    const ud = { pose, head, rig, mark: o.mark, hideCol: o.hide, real: null };
+    ud.setPose = (st, hu, wk) => { setPose(st, hu, wk); if (ud.real) ud.real.pose(st, hu, wk, performance.now() / 1000); };
+    g.userData = ud;
     setPose(0, 0);
-    return shade(g);
+    shade(g); CAMELS.push(g); camelUp(g);
+    return g;
   }
 
   // ------- السيارة: لاندكروزر أبيض غارز، والكبوت مفتوح -------
@@ -710,11 +885,11 @@
     // الناس: مشعل وكبير القرية وثلاثة، ومجدي عند الوجار
     majPeople = {
       man: makeMan({ sit: true, jug: false }),
-      elder: makeMan({ thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6", sit: true }),
-      v1: makeMan({ thobe: "#f5f2eb", shemagh: "dark", jug: false, sit: true }),
+      elder: makeMan({ thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6", sit: true, real: "elder" }),
+      v1: makeMan({ thobe: "#f5f2eb", shemagh: "dark", jug: false, sit: true, real: "villager" }),
       v2: makeMan({ thobe: "#f0ece3", shemagh: "red", jug: false, sit: true }),
-      v3: makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false, sit: true, beard: "#3a3027" }),
-      magdy: makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null })
+      v3: makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false, sit: true, beard: "#3a3027", real: "villager" }),
+      magdy: makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null, real: "magdy" })
     };
     const P = majPeople;
     P.man.position.set(-2.4, 0, -2.9); P.elder.position.set(-.2, 0, -2.9);
@@ -1071,6 +1246,7 @@
       if (dialog.shown >= dialog.full.length) lineDone();
     }
     if (man) (P2.on ? update2 : update)(dt);
+    realTick(dt);
     updatePuffs(dt);
     renderer.render(scene, camera);
     if (P2.on && P2.mirror) renderMirror();
@@ -1271,7 +1447,7 @@
       camel.position.set(px, groundY(px, pz), pz); camel.rotation.y = yaw;
       walkPhase += dt * spd * .9;
       if (state === "play" || state === "flee") cu.setPose(1, 1, spd > .2 ? walkPhase : 0);
-      const seat = V(0, 2.2 - .85 * (1 - cu.pose.stand), .15).applyAxisAngle(UP, yaw);
+      const seat = V(0, (cu.seatY || 2.2) - .85 * (1 - cu.pose.stand), cu.seatZ || .15).applyAxisAngle(UP, yaw);
       man.position.copy(camel.position).add(seat);
       man.rotation.set(0, yaw + Math.PI, 0);
       d.armL.rotation.x = d.armR.rotation.x = -.7; d.body.position.y = -.55; d.body.rotation.x = 0; d.headG.rotation.x = .1;
@@ -1348,8 +1524,8 @@
     renderer.toneMappingExposure = T.exp; stars.visible = k === "night" || k === "road";
   }
   const fadeTo = (on, cb) => { $("fade").style.opacity = on ? 1 : 0; if (cb) setTimeout(cb, 850); };
-  const ELDER = { thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6" };
-  const VILLAGER = i => ({ thobe: ["#f3efe6", "#ece7dd", "#f7f4ee"][i % 3], shemagh: i % 2 ? "red" : "dark", jug: false });
+  const ELDER = { thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6", real: "elder" };
+  const VILLAGER = i => ({ thobe: ["#f3efe6", "#ece7dd", "#f7f4ee"][i % 3], shemagh: i % 2 ? "red" : "dark", jug: false, real: "villager" });
 
   // ------- الفصل الثالث: القرية -------
   function arriveVillage() {
@@ -1385,7 +1561,7 @@
       ["كبير القرية", "بس الليل دخل، والخط بعيد. تعشّى عندنا ونام… وعندنا لك كلام. إحنا في ضيقة."],
       ["مشعل", "(ليه كلهم يطالعون الناقة كذا؟)"]
     ], () => {
-      const mg = makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null });
+      const mg = makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null, real: "magdy" });
       mg.position.set(VIL_X + .6, VIL_H, VIL_Z + WALL - 4); W1.add(mg); extras.push(mg);
       npcs.push({ o: mg, path: [[VIL_X + .6, VIL_Z + WALL + 1.2], [VIL_X + 6.5, VIL_Z + WALL + 5]], spd: 1.5, ph: 0, delay: 0 });
       cine = { pos: V(gx + 7.5, VIL_H + 2.6, gz + 1), look: V(gx + 3, VIL_H + 1.3, gz - 3) };
@@ -1640,14 +1816,14 @@
   // ------- الناس -------
   const man2 = o => makeMan(Object.assign({ jug: false }, o || {}));
   const LOOK = {
-    salem: { thobe: "#f5f2eb", shemagh: "red", beard: "#3a2d22" },
-    salemPoor: { thobe: "#f0ece3", shemagh: "dark", beard: "#3a2d22" },
-    badr: { thobe: "#ebe6dc", shemagh: "red", beard: "#2a211b" },
-    owner: { thobe: "#e6e1d6", shemagh: "white", beard: "#6b635a", skin: "#b98256" },
-    dhiyab: { thobe: "#f5f2eb", shemagh: "red", beard: "#1b1614" },
-    officer: { thobe: "#8c7a55", shemagh: "none", beard: "#241c16", beret: "#2f4a2a" },
-    lawyer: { thobe: "#f0ece3", shemagh: "white", beard: "#2a211b", bisht: "#2b2320" },
-    magdy: { thobe: "#e4e3de", shemagh: "none", skin: "#b07a4f", beard: null }
+    salem: { thobe: "#f5f2eb", shemagh: "red", beard: "#3a2d22", real: "salem" },
+    salemPoor: { thobe: "#f0ece3", shemagh: "dark", beard: "#3a2d22", real: "salem" },
+    badr: { thobe: "#ebe6dc", shemagh: "red", beard: "#2a211b", real: "badr" },
+    owner: { thobe: "#e6e1d6", shemagh: "white", beard: "#6b635a", skin: "#b98256", real: "abufaisal" },
+    dhiyab: { thobe: "#f5f2eb", shemagh: "red", beard: "#1b1614", real: "dhiyab" },
+    officer: { thobe: "#8c7a55", shemagh: "none", beard: "#241c16", beret: "#2f4a2a", real: "officer" },
+    lawyer: { thobe: "#f0ece3", shemagh: "white", beard: "#2a211b", bisht: "#2b2320", real: "lawyer" },
+    magdy: { thobe: "#e4e3de", shemagh: "none", skin: "#b07a4f", beard: null , real: "magdy" }
   };
   // المرأة: عباية وطرحة، وتقدر تتنقّب
   function makeWoman(o) {
@@ -1679,11 +1855,12 @@
       const lap = new THREE.Mesh(new THREE.BoxGeometry(.5, .24, .6), ab); lap.position.set(0, .74, .24); body.add(lap);
       armL.rotation.x = armR.rotation.x = -.5;
     }
-    g.userData = { body, headG, armL, armR, footL, footR, sit: o.sit };
+    g.userData = { body, headG, armL, armR, footL, footR, sit: o.sit, woman: true };
+    if (o.real) { g.userData.rk = o.real; REAL_OBJS.push(g); }
     return shade(g);
   }
-  const nora = o => makeWoman(Object.assign({ scarf: "#1f1b22" }, o));
-  const umm = o => makeWoman(o);
+  const nora = o => makeWoman(Object.assign({ scarf: "#1f1b22", real: "nora" }, o));
+  const umm = o => makeWoman(Object.assign({ real: "umm" }, o));
   let BURQA = null;
   function burqaMat() {
     if (BURQA) return BURQA;
@@ -1854,10 +2031,10 @@
     W1.visible = !s || !!s.keepW1;
     setGround = s && s.ground || null; setObs = s && s.obs || null; setRects = s && s.rects || null; setBound = s && s.bound || null;
   }
-  function put(o, x, z, ry, lift) { o.position.set(x, groundY(x, z) + (lift || 0), z); o.rotation.y = ry || 0; SET.g.add(o); return o; }
+  function put(o, x, z, ry, lift) { o.userData.lift = lift || 0; o.position.set(x, groundY(x, z) + (lift || 0), z); o.rotation.y = ry || 0; SET.g.add(o); return o; }
   function faceTo(o, x, z) { o.rotation.y = Math.atan2(x - o.position.x, z - o.position.z) + (o.userData.armL ? 0 : Math.PI); }
   function walkN(o, pts, spd, delay, done, face) { npcs = npcs.filter(m => m.o !== o); const n = { o, path: pts.map(p => p.slice()), spd: spd || 1.4, ph: Math.random() * 6, delay: delay || 0, done, faceTo: face }; npcs.push(n); return n; }
-  function setHero(o) { drop(man); man = man2(o); scene.add(man); man.position.set(px, groundY(px, pz), pz); }
+  function setHero(o) { drop(man); man = man2(Object.assign({ real: o === LOOK.salemPoor ? "salem" : "mishal" }, o)); scene.add(man); man.position.set(px, groundY(px, pz), pz); }
   const faceHeroTo = (x, z) => { yaw = Math.atan2(-(x - px), -(z - pz)); };
   function heroTo(tx, tz, sp, dt) {
     const dx = tx - px, dz = tz - pz, dd = Math.hypot(dx, dz);
@@ -2328,8 +2505,8 @@
     const S = makeMarket(); useSet(S); setTime("day");
     px = -1.2; pz = 27.5; yaw = 0; camYaw = 0; setHero({ shemagh: "dark" });
     const badr = put(man2(LOOK.badr), 1.2, 28, Math.PI);
-    const dallal = put(man2({ thobe: "#e6e1d6", shemagh: "red", beard: "#2a211b" }), 5.6, .6, Math.PI - .5);
-    [[-12, 1.6], [-9.5, 2.2], [-7.4, 1.4], [8.4, 1.8], [10.8, 1.3], [13.5, 2.4]].forEach(([x, z], i) => put(man2({ thobe: ["#f5f2eb", "#ece7dd", "#f0ece3"][i % 3], shemagh: i % 2 ? "red" : "white", beard: "#2a211b" }), x, z, Math.PI + rnd(-.3, .3)));
+    const dallal = put(man2({ thobe: "#e6e1d6", shemagh: "red", beard: "#2a211b", real: "villager" }), 5.6, .6, Math.PI - .5);
+    [[-12, 1.6], [-9.5, 2.2], [-7.4, 1.4], [8.4, 1.8], [10.8, 1.3], [13.5, 2.4]].forEach(([x, z], i) => put(man2({ thobe: ["#f5f2eb", "#ece7dd", "#f0ece3"][i % 3], shemagh: i % 2 ? "red" : "white", beard: "#2a211b", real: "villager" }), x, z, Math.PI + rnd(-.3, .3)));
     MK = { S, badr, dallal, lot: [], found: 0, sus: 0 };
     if (retry) { badr.position.set(-2.4, 0, 1.4); return marketGame(); }
     banner(...CH2.market); noraMsg("market");
@@ -2396,7 +2573,7 @@
   function marketWin() {
     P2.tick = null; P2.btn = null; $("bview").hidden = true; ui2({});
     setPath("market", MK.sus > 0 ? "noticed" : "clean");
-    const seller = put(man2({ thobe: "#f5f2eb", shemagh: "dark", beard: "#241c16" }), 6.5, 2.6, -Math.PI / 2);
+    const seller = put(man2({ thobe: "#f5f2eb", shemagh: "dark", beard: "#241c16", real: "villager" }), 6.5, 2.6, -Math.PI / 2);
     walkN(seller, [[3.2, 2.4]], 1.2, 0, null, [px, pz]);
     say([
       ["بدر", "(يهمس) ثلاث منها أعرفها بعيوني… هذي «الوضحا»، وهذي «شعلة». حلالنا.", () => faceShot(MK.badr, 2.2, .6)],
@@ -2994,7 +3171,7 @@
     const S = makeCourt(); useSet(S); setTime("indoor"); P2.keepHud = true;
     px = -4.6; pz = -.7; yaw = 0; setHero({ shemagh: "none" });
     const J = [-1.8, 0, 1.8].map(x => put(man2({ thobe: "#ebe6dc", shemagh: "white", beard: "#cfc8bd", bisht: "#1f1a17", sit: true }), x, -5.2, 0, 1.05));
-    const law = put(man2(LOOK.lawyer), -3.4, -.35, Math.PI), pros = put(man2({ thobe: "#e6e1d6", shemagh: "white", beard: "#3a3027" }), 3.6, -.5, Math.PI);
+    const law = put(man2(LOOK.lawyer), -3.4, -.35, Math.PI), pros = put(man2({ thobe: "#e6e1d6", shemagh: "white", beard: "#3a3027", real: "villager" }), 3.6, -.5, Math.PI);
     const dh = put(man2(LOOK.dhiyab), 4.9, -.2, Math.PI + .25);
     const nr = put(nora({ sit: true }), -2.4, 2.7, Math.PI, .45), um = put(umm({ sit: true }), -3.2, 2.7, Math.PI, .45);
     const ow = put(man2(Object.assign({ sit: true }, LOOK.owner)), 2.6, 2.7, Math.PI, .45);
@@ -3283,7 +3460,7 @@
   build();
   camPos.set(5.5, groundY(0, 0) + 3.2, 11);
   titleCard();
-  loadReal();
+  loadReal(); loadCamel();
   requestAnimationFrame(frame);
 })();
 </script>
