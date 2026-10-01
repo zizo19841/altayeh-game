@@ -396,7 +396,7 @@
     if (!G || u.real) return;
     const s = THREE.SkeletonUtils ? THREE.SkeletonUtils.clone(G.scene) : G.scene;
     s.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.frustumCulled = false; } });
-    m.add(s); m.updateMatrixWorld(true);
+    m.add(s); s.position.y = -.065; m.updateMatrixWorld(true);
     // نتأكد إن وجهه لقدام (+z) مثل باقي الشخصيات
     const head = s.getObjectByName("Head"), front = s.getObjectByName("headfront");
     if (head && front) { const a = head.getWorldPosition(V(0, 0, 0)), b = front.getWorldPosition(V(0, 0, 0)); m.worldToLocal(a); m.worldToLocal(b); if (b.z < a.z) s.rotation.y = Math.PI; }
@@ -424,7 +424,7 @@
         if (w > 0 && w < 1) R.tired.time = R.walk.time / R.wd * R.td;
       } else {
         // واقف: رجوله مع بعض
-        R.walk.timeScale = R.tired.timeScale = 0; R.walk.time = 1.2; R.tired.time = 3.9;
+        R.walk.timeScale = R.tired.timeScale = 0; R.walk.time = 2.01; R.tired.time = 3.26;
       }
       R.mixer.update(dt);
     }
