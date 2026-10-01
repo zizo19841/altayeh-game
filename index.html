@@ -607,7 +607,7 @@
 
   // كل النوق: إذا وصل المجسّم الواقعي تتبدّل له، وإلا تبقى المبسّطة
   let CAMEL_KIT = null; const CAMELS = [];
-  function camelUp(g) {
+  function upgradeCamel(g) {
     const u = g.userData; if (u.real || !CAMEL_KIT) return;
     const R = camelReal(CAMEL_KIT, u.hideCol); g.add(R.mesh); u.rig.visible = false; u.real = R; u.seatY = 2.05; u.seatZ = .45;
     if (u.mark) {
@@ -619,7 +619,7 @@
   }
   function loadCamel() {
     if (!THREE.GLTFLoader) return;
-    try { new THREE.GLTFLoader().load("assets/camel.glb", gl => { CAMEL_KIT = camelKit(gl); CAMELS.forEach(camelUp); }, undefined, () => {}); } catch (e) {}
+    try { new THREE.GLTFLoader().load("assets/camel.glb", gl => { CAMEL_KIT = camelKit(gl); CAMELS.forEach(upgradeCamel); }, undefined, () => {}); } catch (e) {}
   }
 
   // ------- الناقة: ترتفع عند السنام قرابة مترين، وتقدر تبرك وتقوم -------
@@ -672,7 +672,7 @@
     ud.setPose = (st, hu, wk) => { setPose(st, hu, wk); if (ud.real) ud.real.pose(st, hu, wk, performance.now() / 1000); };
     g.userData = ud;
     setPose(0, 0);
-    shade(g); CAMELS.push(g); camelUp(g);
+    shade(g); CAMELS.push(g); upgradeCamel(g);
     return g;
   }
 
