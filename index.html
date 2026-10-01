@@ -475,6 +475,25 @@
     });
     u.rl = { s, sc, mixer, acts, w: {}, last: m.position.clone(), v: 0 };
   }
+  const _q1 = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _q3 = new THREE.Quaternion(), _e = new THREE.Euler(), _v1 = V(0, 0, 0), UPV = V(0, 1, 0);
+  // يلف عظمة بدوران محسوب بإحداثيات العالم (عشان ما نحتاج نعرف محاور كل عظمة)
+  function boneTurn(b, worldQ) {
+    b.parent.getWorldQuaternion(_q1); _q2.copy(_q1).invert();
+    b.quaternion.premultiply(_q1).premultiply(worldQ).premultiply(_q2);
+  }
+  // الأغراض اللي بيد الشخصية المبسّطة (دلة، فناجيل، جوال) تنتقل ليد الشخصية الواقعية
+  function adoptProps(m, R) {
+    const u = m.userData;
+    [["L", u.armL], ["R", u.armR]].forEach(([sd, arm]) => {
+      const hand = arm.children[1];
+      for (let i = arm.children.length - 1; i >= 2; i--) {
+        const pr = arm.children[i], h = new THREE.Group(); arm.remove(pr);
+        pr.position.sub(hand.position); h.add(pr); m.add(h); R.props.push({ h, sd, arm });
+      }
+      const ph = hand.userData.ph;
+      if (ph && ph.parent === hand) { const h = new THREE.Group(); hand.remove(ph); ph.position.set(0, 0, 0); h.add(ph); m.add(h); R.props.push({ h, sd: "ear", arm, ph }); }
+    });
+  }
   function realTick(dt) {
     for (let i = REAL_OBJS.length - 1; i >= 0; i--) {
       const m = REAL_OBJS[i], u = m.userData;
@@ -482,13 +501,15 @@
       if (!m.parent) { u.orphan = (u.orphan || 0) + dt; if (u.orphan > 4) REAL_OBJS.splice(i, 1); continue; }
       u.orphan = 0;
       const G = personGLB(u.rk); if (!G) continue;
-      // إذا بيده شي (دلة، جوال، فناجيل) نخليه بالشكل المبسّط عشان يبان الشي اللي بيده
-      const props = u.armL.children.length > 2 || u.armR.children.length > 2;
-      if (!u.rl) { if (props) continue; realize(m, G); }
-      const R = u.rl, on = !props;
-      R.s.visible = on; u.body.visible = !on;
+      if (!u.rl) {
+        realize(m, G); const R0 = u.rl;
+        R0.props = []; R0.base = { lx: u.armL.rotation.x, lz: u.armL.rotation.z, rx: u.armR.rotation.x, rz: u.armR.rotation.z };
+        R0.bones = { L: R0.s.getObjectByName("LeftArm"), R: R0.s.getObjectByName("RightArm"), LH: R0.s.getObjectByName("LeftHand"), RH: R0.s.getObjectByName("RightHand"), head: R0.s.getObjectByName("Head") };
+      }
+      const R = u.rl;
+      R.s.visible = m.visible; u.body.visible = false;
+      adoptProps(m, R);
       const sp = Math.hypot(m.position.x - R.last.x, m.position.z - R.last.z) / Math.max(dt, 1e-3); R.last.copy(m.position);
-      if (!on) continue;
       R.v = lerp(R.v, Math.min(sp, 8), Math.min(1, dt * 6));
       const mode = u.sit && R.acts.sit ? "sit" : R.v > .35 || !R.acts.idle ? "walk" : "idle";
       for (const k in R.acts) { R.w[k] = lerp(R.w[k] == null ? (k === mode ? 1 : 0) : R.w[k], k === mode ? 1 : 0, Math.min(1, dt * 5)); R.acts[k].setEffectiveWeight(R.w[k]); }
@@ -496,7 +517,31 @@
       R.mixer.update(dt);
       // الجالس على كرسي: نرجّع الرجلين للأرض
       R.s.position.y = -.065 * R.sc - (mode === "sit" ? (u.lift || 0) : 0);
+      m.updateMatrixWorld(true); m.getWorldQuaternion(_q3);
+      // اليدين تتبع حركات القصة (يصب، يمد يده للمفتاح، يرفع الجوال)
+      if (u.armDrive) [["L", "lx", "lz", u.armL], ["R", "rx", "rz", u.armR]].forEach(([sd, kx, kz, arm]) => {
+        const b = R.bones[sd]; if (!b) return;
+        const dx = arm.rotation.x - R.base[kx], dz = arm.rotation.z - R.base[kz];
+        if (Math.abs(dx) + Math.abs(dz) < .01) return;
+        _e.set(dx, 0, dz); const wq = new THREE.Quaternion().setFromEuler(_e);
+        boneTurn(b, wq.premultiply(_q3).multiply(_q2.copy(_q3).invert()));
+      });
+      // يلف راسه (كبير القرية يطالع الضيف)
+      if (u.headYaw && R.bones.head) boneTurn(R.bones.head, _q1.setFromAxisAngle(UPV, u.headYaw));
+      if (u.armDrive || u.headYaw || R.props.length) R.s.updateMatrixWorld(true);
+      R.props.forEach(pp => {
+        if (pp.ph) { pp.h.visible = pp.ph.visible; const hb = R.bones.head; if (hb) { hb.getWorldPosition(_v1); m.worldToLocal(_v1); pp.h.position.copy(_v1).add(V(-.1, .02, .03)); } return; }
+        const hb = R.bones[pp.sd + "H"]; if (!hb) return;
+        hb.getWorldPosition(_v1); m.worldToLocal(_v1); pp.h.position.copy(_v1);
+        pp.arm.getWorldQuaternion(_q1); pp.h.quaternion.copy(_q3).invert().multiply(_q1);
+      });
     }
+  }
+  // مكان يد الشخصية (الواقعية إذا موجودة)
+  function handPos(m, sd, out) {
+    const u = m.userData, R = u.rl;
+    if (R && R.s.visible && R.bones[sd + "H"]) return R.bones[sd + "H"].getWorldPosition(out);
+    return (sd === "L" ? u.armL : u.armR).children[1].getWorldPosition(out);
   }
 
   // ------- ملامح الوجه: عيون وحواجب وخشم وشنب -------
@@ -754,7 +799,7 @@
   // ------- القرية: سور، وبيوت طين، وبرج حارس بكشاف، وبوابة من جنوب -------
   const HOUSES = [[-13, -15, 8, 7, 3.4], [2, -16, 9, 5, 3.8], [14, -12, 7, 8, 3.2], [-15, 3, 6, 9, 3], [-4, 6, 5, 5, 3.2], [12, 5, 8, 7, 3.6], [-11, 15, 7, 5, 3], [10, 16, 7, 5, 3]];
   const TOWER = [2, -3], WALL = 22, GATE_W = 2.6;
-  let rects = [], vilLamps = [], spot = null, beamCone = null, gateDoor = null, gateTarget = 0, gateRate = 2.2;
+  let rects = [], vilLamps = [], spot = null, beamCone = null, gateDoor = null, gateTarget = 0, gateRate = 2.2, gateCreak = false;
   function makeVillage() {
     const g = new THREE.Group(), mud = M("#b0804e", { roughness: 1 }), mudDark = M("#94683e", { roughness: 1 }), dark = M("#2e2118"), wood = M("#6b4a2b", { roughness: .9 });
     rects = []; vilLamps = [];
@@ -789,7 +834,7 @@
     g.add(gateDoor);
     // البرج والحارس والكشاف
     box(TOWER[0], TOWER[1], 3, 3, 7, mudDark);
-    const guard = makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false }); guard.position.set(TOWER[0], 7, TOWER[1]); g.add(guard);
+    const guard = makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false, real: "guard" }); guard.position.set(TOWER[0], 7, TOWER[1]); g.add(guard);
     spot = new THREE.SpotLight("#ffd79a", 0, 60, .2, .5, 1); spot.position.set(TOWER[0], 8.4, TOWER[1]); g.add(spot, spot.target);
     beamCone = new THREE.Mesh(new THREE.ConeGeometry(1, 1, 24, 1, true), new THREE.MeshBasicMaterial({ color: "#ffe2a8", transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
     g.add(beamCone);
@@ -837,20 +882,23 @@
   const MAJ = V(VIL_X, VIL_H - 80, VIL_Z);
   let majlis = null, majPeople = {}, coffee = { phase: "idle", t: 0 };
   function makeMajlis() {
-    const g = new THREE.Group(), W2 = 5, D2 = 3.6, Hh = 3.4;
-    const mudT = noiseTex("#8c6644", ["#74532f", "#9e7852", "#5f4428"], 3600, 256); mudT.repeat.set(3, 1.2);
+    // مجلس كبير: الجدار اللي ورا الجلسة ثابت على z=-3.6، والمجلس يمتد للجنبين ولقدّام
+    const g = new THREE.Group(), W2 = 7.5, BACK = -3.6, FRONT = 5.8, D2 = (FRONT - BACK) / 2, CZ = (FRONT + BACK) / 2, Hh = 4;
+    const mudT = noiseTex("#8c6644", ["#74532f", "#9e7852", "#5f4428"], 3600, 256); mudT.repeat.set(4.5, 1.4);
     const mud = new THREE.MeshStandardMaterial({ map: mudT, roughness: 1 });
-    g.add(makeRoom(W2 * 2, Hh, D2 * 2, mud, M("#5a3f2a", { roughness: 1 }), new THREE.MeshStandardMaterial({ map: roofTex(), roughness: 1 })));
+    const room = makeRoom(W2 * 2, Hh, D2 * 2, mud, M("#5a3f2a", { roughness: 1 }), new THREE.MeshStandardMaterial({ map: roofTex(), roughness: 1 })); room.position.z = CZ; g.add(room);
     // جص أغمق تحت، وخشب أثل في السقف
     const skirt = M("#8a6240", { roughness: 1 });
-    [[0, -D2 + .01, W2 * 2, 0], [0, D2 - .01, W2 * 2, Math.PI], [-W2 + .01, 0, D2 * 2, Math.PI / 2], [W2 - .01, 0, D2 * 2, -Math.PI / 2]].forEach(([x, z, w, ry]) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, .5), skirt); p.position.set(x, .25, z); p.rotation.y = ry; g.add(p); });
+    [[0, BACK + .01, W2 * 2, 0], [0, FRONT - .01, W2 * 2, Math.PI], [-W2 + .01, CZ, D2 * 2, Math.PI / 2], [W2 - .01, CZ, D2 * 2, -Math.PI / 2]].forEach(([x, z, w, ry]) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, .5), skirt); p.position.set(x, .25, z); p.rotation.y = ry; g.add(p); });
     const beam = M("#3e2a1a", { roughness: .9 });
-    for (let i = 0; i < 6; i++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(.09, .1, W2 * 2, 8), beam); b.rotation.z = Math.PI / 2; b.position.set(0, Hh - .1, -3 + i * 1.2); g.add(b); }
+    for (let i = 0; i < 8; i++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(.09, .1, W2 * 2, 8), beam); b.rotation.z = Math.PI / 2; b.position.set(0, Hh - .1, BACK + .6 + i * 1.2); g.add(b); }
+    // عمودين خشب في النص يشيلون السقف
+    [[-4.6, .4], [4.6, .4]].forEach(([x, z]) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(.13, .16, Hh, 10), beam); c.position.set(x, Hh / 2, z); g.add(c); });
     // كوّات في الجدار، فيها دلال وقوارير
-    [-3.6, 0, 3.6].forEach((x, i) => {
-      const n = new THREE.Mesh(new THREE.PlaneGeometry(.6, .75), M("#2e1f14", { roughness: 1 })); n.position.set(x, 2.25, -D2 + .015); g.add(n);
-      const arch = new THREE.Mesh(new THREE.CircleGeometry(.3, 12, 0, Math.PI), n.material); arch.position.set(x, 2.62, -D2 + .015); g.add(arch);
-      const d = makeDallah(.7); d.position.set(x - .05, 1.9, -D2 + .15); if (i !== 1) g.add(d);
+    [-5.6, -3.6, 0, 3.6, 5.6].forEach((x, i) => {
+      const n = new THREE.Mesh(new THREE.PlaneGeometry(.6, .75), M("#2e1f14", { roughness: 1 })); n.position.set(x, 2.25, BACK + .015); g.add(n);
+      const arch = new THREE.Mesh(new THREE.CircleGeometry(.3, 12, 0, Math.PI), n.material); arch.position.set(x, 2.62, BACK + .015); g.add(arch);
+      const d = makeDallah(.7); d.position.set(x - .05, 1.9, BACK + .15); if (i !== 2) g.add(d);
     });
     // الفرشة: مطارح، ومساند بالسدو، ومراكي
     const matM = new THREE.MeshStandardMaterial({ map: saduTex(8), roughness: 1 }), back = new THREE.MeshStandardMaterial({ map: saduTex(6), roughness: 1 }), plain = M("#6d1f1c", { roughness: 1 });
@@ -858,19 +906,19 @@
       const s = new THREE.Mesh(new THREE.BoxGeometry(w, .14, d), [plain, plain, matM, plain, plain, plain]); s.position.set(x, .07, z); s.rotation.y = rot || 0; g.add(s);
       const b = new THREE.Mesh(new THREE.BoxGeometry(w, .55, .22), [plain, plain, plain, plain, back, plain]); b.position.set(0, .41, -d / 2 + .11); s.add(b);
     };
-    seat(0, -D2 + .38, W2 * 2 - .2, .76); seat(W2 - .38, .3, 5.2, .76, -Math.PI / 2);
+    seat(0, BACK + .38, W2 * 2 - .2, .76); seat(W2 - .38, CZ - .6, D2 * 2 - 2.6, .76, -Math.PI / 2); seat(-W2 + .38, CZ - .6, D2 * 2 - 2.6, .76, Math.PI / 2);
     const rest = M("#7a2420", { roughness: .9 });
-    [-3.4, -1.3, .45, 1.7, 3.6].forEach(x => { const r = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .5, 12), rest); r.rotation.x = Math.PI / 2; r.position.set(x, .25, -D2 + .55); g.add(r); });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W2 * 1.5, D2 * 1.2), new THREE.MeshStandardMaterial({ map: carpetTex(), roughness: 1 })); floor.rotation.x = -Math.PI / 2; floor.position.set(-.3, .012, .1); g.add(floor);
+    [-6.2, -4.8, -3.4, -1.3, .45, 1.7, 3.6, 5, 6.4].forEach(x => { const r = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .5, 12), rest); r.rotation.x = Math.PI / 2; r.position.set(x, .25, BACK + .55); g.add(r); });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W2 * 1.6, D2 * 1.4), new THREE.MeshStandardMaterial({ map: carpetTex(), roughness: 1 })); floor.rotation.x = -Math.PI / 2; floor.position.set(0, .012, CZ - .4); g.add(floor);
     // الوجار: جمر ودلال
-    const hearth = new THREE.Group(); hearth.position.set(3.7, 0, 2.5); g.add(hearth);
+    const hearth = new THREE.Group(); hearth.position.set(5.2, 0, 3.6); g.add(hearth);
     const base = new THREE.Mesh(new THREE.BoxGeometry(1.3, .32, 1.0), M("#7a5a3c", { roughness: 1 })); base.position.y = .16; hearth.add(base);
     const pit = new THREE.Mesh(new THREE.BoxGeometry(.8, .02, .55), M("#1a1210")); pit.position.y = .33; hearth.add(pit);
     const coalM = M("#ff5a1a", { emissive: "#ff4a10", emissiveIntensity: 1.6, roughness: .8 });
     for (let i = 0; i < 9; i++) { const c = new THREE.Mesh(new THREE.DodecahedronGeometry(.05, 0), coalM); c.position.set(rnd(-.3, .3), .36, rnd(-.2, .2)); hearth.add(c); }
     const flames = ["#ff8a2a", "#ffb347"].map((c, i) => { const f = new THREE.Sprite(new THREE.SpriteMaterial({ map: puffTex, color: c, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); f.position.set(i * .1 - .05, .5, 0); hearth.add(f); return f; });
     [[-.5, .25, .9], [.52, .3, .75], [.1, -.35, 1.1]].forEach(([x, z, k]) => { const d = makeDallah(k * .8); d.position.set(x, .32, z); hearth.add(d); });
-    const hl = new THREE.PointLight("#ff8a3a", 1.0, 8, 2); hl.position.set(3.7, .9, 2.5); g.add(hl);
+    const hl = new THREE.PointLight("#ff8a3a", 1.0, 9, 2); hl.position.set(5.2, .9, 3.6); g.add(hl);
     // المبخرة وصينية التمر
     const mb = new THREE.Group(); mb.position.set(-1.2, 0, -1.7); g.add(mb);
     const mbB = new THREE.Mesh(new THREE.CylinderGeometry(.09, .13, .16, 4), M("#4a2e1a", { roughness: .7 })); mbB.position.y = .08; mbB.rotation.y = Math.PI / 4; mb.add(mbB);
@@ -878,23 +926,34 @@
     const tray = new THREE.Mesh(new THREE.CylinderGeometry(.28, .26, .03, 20), M("#b87333", { metalness: .7, roughness: .35 })); tray.position.set(.4, .03, -1.85); g.add(tray);
     for (let i = 0; i < 14; i++) { const d = new THREE.Mesh(new THREE.SphereGeometry(.03, 6, 5), M("#4a2412", { roughness: .5 })); d.scale.set(1, .7, 1.5); const a = rnd(0, 6.3), r = rnd(0, .2); d.position.set(.4 + Math.cos(a) * r, .06, -1.85 + Math.sin(a) * r); d.rotation.y = a; g.add(d); }
     // الشباك بخشبه، والفانوس
-    const sh = new THREE.Mesh(new THREE.PlaneGeometry(.8, .7), M("#5a3a22", { roughness: 1 })); sh.position.set(-W2 + .02, 2, .6); sh.rotation.y = Math.PI / 2; g.add(sh);
-    const lan = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, .3, 8), M("#f3c46a", { emissive: "#c4822a", emissiveIntensity: 1 })); lan.position.set(-.6, 2.5, -1); g.add(lan);
-    const ch = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .8, 4), M("#222")); ch.position.set(-.6, 3.05, -1); g.add(ch);
-    const light = new THREE.PointLight("#ffb866", 1.05, 12, 2); light.position.set(-.6, 2.3, -1); g.add(light);
+    const sh = new THREE.Mesh(new THREE.PlaneGeometry(.8, .7), M("#5a3a22", { roughness: 1 })); sh.position.set(-W2 + .02, 2, 2.6); sh.rotation.y = Math.PI / 2; g.add(sh);
+    // باب المجلس قدّام
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 2.3), M("#4a301c", { roughness: .9 })); door.position.set(.6, 1.15, FRONT - .02); door.rotation.y = Math.PI; g.add(door);
+    // فوانيس معلّقة: واحد فوق الجلسة، واثنين على الجنبين
+    let light = null;
+    [[-.6, -1], [-4.6, 1.8], [3.4, 2.4]].forEach(([x, z], i) => {
+      const lan = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, .3, 8), M("#f3c46a", { emissive: "#c4822a", emissiveIntensity: 1 })); lan.position.set(x, Hh - .9, z); g.add(lan);
+      const ch = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .8, 4), M("#222")); ch.position.set(x, Hh - .35, z); g.add(ch);
+      const l = new THREE.PointLight("#ffb866", i ? .7 : 1.05, i ? 9 : 12, 2); l.position.set(x, Hh - 1.1, z); g.add(l); if (!i) light = l;
+    });
     // الناس: مشعل وكبير القرية وثلاثة، ومجدي عند الوجار
     majPeople = {
-      man: makeMan({ sit: true, jug: false }),
+      man: makeMan({ sit: true, jug: false, real: "mishal" }),
       elder: makeMan({ thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6", sit: true, real: "elder" }),
-      v1: makeMan({ thobe: "#f5f2eb", shemagh: "dark", jug: false, sit: true, real: "villager" }),
-      v2: makeMan({ thobe: "#f0ece3", shemagh: "red", jug: false, sit: true }),
-      v3: makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false, sit: true, beard: "#3a3027", real: "villager" }),
-      magdy: makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null, real: "magdy" })
+      v1: makeMan({ thobe: "#f5f2eb", shemagh: "dark", jug: false, sit: true, real: "v_heavy" }),
+      v2: makeMan({ thobe: "#f0ece3", shemagh: "red", jug: false, sit: true, real: "v_young" }),
+      v3: makeMan({ thobe: "#ebe6dc", shemagh: "dark", jug: false, sit: true, beard: "#3a3027", real: "v_old" }),
+      magdy: makeMan({ thobe: "#e4e3de", shemagh: "none", jug: false, skin: "#b07a4f", beard: null, real: "magdy" }),
+      v4: makeMan({ thobe: "#d9cfb8", shemagh: "red", jug: false, sit: true, real: "v_mid" }),
+      v5: makeMan({ thobe: "#e9e4d8", shemagh: "dark", jug: false, sit: true, real: "v_bedu" }),
+      v6: makeMan({ thobe: "#f3f0e8", shemagh: "white", jug: false, sit: true, real: "v_tall" })
     };
     const P = majPeople;
     P.man.position.set(-2.4, 0, -2.9); P.elder.position.set(-.2, 0, -2.9);
-    P.v1.position.set(1.1, 0, -2.9); P.v2.position.set(2.3, 0, -2.75); P.v3.position.set(4.3, 0, -.6); P.v3.rotation.y = -Math.PI / 2;
+    P.v1.position.set(1.1, 0, -2.9); P.v2.position.set(2.3, 0, -2.75); P.v3.position.set(6.8, 0, -.4); P.v3.rotation.y = -Math.PI / 2;
+    P.v4.position.set(-6.8, 0, -.2); P.v4.rotation.y = Math.PI / 2; P.v5.position.set(-6.8, 0, 1.6); P.v5.rotation.y = Math.PI / 2; P.v6.position.set(6.8, 0, 1.5); P.v6.rotation.y = -Math.PI / 2;
     Object.values(P).forEach(o => g.add(o));
+    P.man.userData.armDrive = P.magdy.userData.armDrive = true;
     // دلة مجدي بيسراه، والفناجيل بيمناه
     const md = makeDallah(.9); md.position.set(0, -.72, .05); md.rotation.y = -Math.PI / 2; P.magdy.userData.armL.add(md);
     const cups = new THREE.Group(); for (let i = 0; i < 3; i++) { const f = finjan(); f.position.y = i * .03; cups.add(f); }
@@ -910,7 +969,7 @@
     g.position.copy(MAJ);
     return shade(g);
   }
-  const MAGDY_HOME = [3.1, 1.6];
+  const MAGDY_HOME = [4.4, 2.8];
   function resetCoffee() {
     const P = majPeople, U = majlis.userData;
     coffee = { phase: "idle", t: 0, act: null };
@@ -934,7 +993,7 @@
     // دخان البخور
     majTick.sm = (majTick.sm || 0) - dt;
     if (majTick.sm <= 0) { majTick.sm = .35; const p = V(0, .3, 0); U.mb.localToWorld(p); puff(p, "#d8d0c4", .25, 3.2, V(rnd(-.05, .05), .28, rnd(-.05, .05))); }
-    const hand = V(0, 0, 0), manHand = P.man.userData.armR.children[1];
+    const hand = V(0, 0, 0);
     const walkTo = (x, z, sp) => {
       const dx = x - mg.position.x, dz = z - mg.position.z, dd = Math.hypot(dx, dz);
       if (dd > .06) { const st = Math.min(dd, sp * dt); mg.position.x += dx / dd * st; mg.position.z += dz / dd * st; mg.rotation.y = lerpAng(mg.rotation.y, Math.atan2(dx, dz), Math.min(1, dt * 8)); coffee.ph = (coffee.ph || 0) + dt * 7; mu.footL.position.z = Math.sin(coffee.ph) * .2; mu.footR.position.z = -Math.sin(coffee.ph) * .2; }
@@ -966,11 +1025,11 @@
       walkTo(.9, -.5, 1.1);
     } else if (coffee.phase === "out") {
       mu.body.rotation.x *= .9; U.md.rotation.z = 0;
-      if (walkTo(.6, 3.4, 1.6) <= .06) { mg.visible = false; coffee.phase = "gone"; }
+      if (walkTo(.6, 5.3, 1.6) <= .06) { mg.visible = false; coffee.phase = "gone"; }
     }
     // الفنجال في يد مشعل: يشرب، أو يهزه
     if (U.cup.visible) {
-      manHand.getWorldPosition(hand); majlis.worldToLocal(hand);
+      handPos(P.man, "R", hand); majlis.worldToLocal(hand);
       U.cup.position.copy(hand).add(V(0, .03, .02));
       const ma = P.man.userData.armR;
       if (coffee.act === "drink") { coffee.t2 = (coffee.t2 || 0) + dt; ma.rotation.x = lerp(ma.rotation.x, coffee.t2 < 1.6 ? -2.3 : -1.0, Math.min(1, dt * 4)); if (coffee.t2 > .9) U.coffeeM.visible = false; }
@@ -1071,6 +1130,38 @@
   }
 
   // ------- الحوار والاختيار -------
+  // ------- الأصوات: صرير البوابة، وصوت كل شخصية -------
+  let AC = null;
+  const actx = () => {
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+    if (AC && AC.state === "suspended") AC.resume();
+    return AC;
+  };
+  // صرير خشب البوابة وهي تتحرك على مفصّلاتها
+  function creak(dur) {
+    const a = actx(); if (!a) return;
+    const t0 = a.currentTime, o = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain(), lfo = a.createOscillator(), lg = a.createGain();
+    o.type = "sawtooth"; o.frequency.setValueAtTime(62, t0); o.frequency.linearRampToValueAtTime(96, t0 + dur * .55); o.frequency.linearRampToValueAtTime(55, t0 + dur);
+    lfo.frequency.value = 7; lg.gain.value = 14; lfo.connect(lg); lg.connect(o.frequency);
+    f.type = "bandpass"; f.frequency.value = 820; f.Q.value = 7;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(.05, t0 + .2); g.gain.setValueAtTime(.05, t0 + Math.max(.3, dur - .4)); g.gain.linearRampToValueAtTime(0, t0 + dur);
+    o.connect(f); f.connect(g); g.connect(a.destination);
+    o.start(t0); lfo.start(t0); o.stop(t0 + dur + .05); lfo.stop(t0 + dur + .05);
+  }
+  // أصوات الكلام: ملف لكل جملة، والفهرس يقول وش الموجود
+  const VO = { map: null, cur: null, on: true };
+  function loadVO() {
+    try { fetch("assets/vo/index.json").then(r => r.ok ? r.json() : null).then(j => { VO.map = j; }).catch(() => {}); } catch (e) {}
+  }
+  function voice(who, text) {
+    if (VO.cur) { VO.cur.pause(); VO.cur = null; }
+    if (!VO.on || !VO.map) return 0;
+    const id = VO.map[who + "|" + text]; if (!id) return 0;
+    const a = new Audio("assets/vo/" + id + ".mp3"); a.volume = .95;
+    const p = a.play(); if (p && p.catch) p.catch(() => {});
+    VO.cur = a; return 1;
+  }
+
   function say(lines, done, choices) {
     if (P2.on && P2.keepHud) { $("joy").hidden = $("jumpb").hidden = true; endJoy(); } else playUI(false);
     dialog = { lines, i: -1, done, choices, shown: 0, full: "" };
@@ -1078,10 +1169,10 @@
   }
   function nextLine() {
     const d = dialog; d.i++;
-    if (d.i >= d.lines.length) { $("dlg").hidden = true; dialog = null; d.done && d.done(); return; }
+    if (d.i >= d.lines.length) { $("dlg").hidden = true; dialog = null; voice("", ""); d.done && d.done(); return; }
     const [who, text, fx] = d.lines[d.i];
     if (fx) fx();
-    $("who").textContent = who; $("txt").textContent = ""; d.full = text; d.shown = 0;
+    $("who").textContent = who; $("txt").textContent = ""; d.full = text; d.shown = 0; voice(who, text);
     $("dlg").classList.toggle("tip", who === "تلميح"); $("next").hidden = true; $("choices").hidden = true; $("dlg").hidden = false;
   }
   function lineDone() {
@@ -1104,7 +1195,11 @@
     nextLine();
   }
   let barkTm = 0;
-  function bark(text) { $("bark").textContent = text; $("bark").hidden = false; clearTimeout(barkTm); barkTm = setTimeout(() => { $("bark").hidden = true; }, 2600); }
+  function bark(text) {
+    $("bark").textContent = text; $("bark").hidden = false; clearTimeout(barkTm);
+    const v = !dialog && voice("مشعل", text);
+    barkTm = setTimeout(() => { $("bark").hidden = true; }, v ? Math.max(2600, text.length * 95) : 2600);
+  }
   function playUI(on) { $("hud").hidden = $("joy").hidden = $("jumpb").hidden = !on; if (!on) endJoy(); }
   function showCard(k, tt, s, label, fn, label2, fn2) {
     playUI(false);
@@ -1138,7 +1233,8 @@
     say([["مشعل", "(خلاص… السيارة ما فيها أمل. ما بقى إلا رجولي.)"]].concat(INTRO.slice(3)), () => { state = "play"; playUI(true); });
   }
   function fail(sub, retry, title, kicker) {
-    state = "fail"; cine = null;
+    // داخل المجلس تبقى الكاميرا على المجلس (لا ترجع لبرا القرية)
+    state = "fail"; if (!(majlis && majlis.visible)) cine = null;
     showCard(kicker || "الفصل الأول: التايه", title || "خلصت المويه…", sub || "العطش والتعب غلبوه… ونورة تنتظر. امشِ شمال على طول، ولا تطلع الطعوس العالية، وابعد عن العوسج.", "حاول مرة ثانية", retry || start);
   }
 
@@ -1417,8 +1513,8 @@
     } else if (state === "lock") {
       barVal = lockProg * 100;
     } else if (state === "opening") {
-      seq.t += dt; gateTarget = 1.6; gateRate = 1.6;
-      if (seq.t > 1.3) startFlee();
+      seq.t += dt; gateTarget = 1.6; gateRate = 3;
+      if (seq.t > 2.6) startFlee();
     } else if (state === "flee") {
       const r = steer(dt, 10, .9); spd = r.spd;
       let lead = 99;
@@ -1525,7 +1621,7 @@
   }
   const fadeTo = (on, cb) => { $("fade").style.opacity = on ? 1 : 0; if (cb) setTimeout(cb, 850); };
   const ELDER = { thobe: "#e6e1d6", shemagh: "white", jug: false, bisht: "#5a4030", beard: "#d8d2c6", real: "elder" };
-  const VILLAGER = i => ({ thobe: ["#f3efe6", "#ece7dd", "#f7f4ee"][i % 3], shemagh: i % 2 ? "red" : "dark", jug: false, real: "villager" });
+  const VILLAGER = i => ({ thobe: ["#f3efe6", "#ece7dd", "#f7f4ee"][i % 3], shemagh: i % 2 ? "red" : "dark", jug: false, real: ["villager", "v_mid", "v_bedu"][i % 3] });
 
   // ------- الفصل الثالث: القرية -------
   function arriveVillage() {
@@ -1585,7 +1681,7 @@
     resetCoffee();
     const at2 = (x, y, z) => MAJ.clone().add(V(x, y, z));
     const P = majPeople, U = majlis.userData;
-    cine = { pos: at2(-.4, 2.5, 3.3), look: at2(-.4, .8, -2.4) };
+    cine = { pos: at2(-.4, 2.9, 4.6), look: at2(-.4, .8, -2.4) };
     camPos.copy(cine.pos);
     fadeTo(false);
     const drink = () => { coffeeDone(); coffee.act = "drink"; coffee.t = 0; };
@@ -1602,7 +1698,8 @@
       ["أهز الفنجال: «بس، مشكور»", () => { ate = false; shakeCup(); say([["كبير القرية", "ما شربت ولا فنجال؟ …القهوة ما تنرد يا ضيف.", () => faceShot(P.elder, 1.25, .2)], ["مشعل", "(رد القهوة عيب… وعيونهم ضاقت عليّ أكثر.)", () => faceShot(P.man, 1.2, .2)]], majlis2wide); }]
     ]);
   }
-  function majlis2wide() { cine = { pos: MAJ.clone().add(V(-.4, 2.5, 3.3)), look: MAJ.clone().add(V(-.4, .8, -2.4)) }; majlis2(); }
+  const majWide = () => ({ pos: MAJ.clone().add(V(-.4, 2.5, 3.3)), look: MAJ.clone().add(V(-.4, .8, -2.4)) });
+  function majlis2wide() { cine = majWide(); majlis2(); }
   function majlis2() {
     say([
       ["كبير القرية", "يا ضيف… إحنا ناس مظلومين. عيال قرية الوادي سرقوا حلالنا، وحلفوا يغزونا قبل الفجر."],
@@ -1632,7 +1729,7 @@
     say([["تلميح", "اضغط مطوّل على «مد يدك» أو المسافة عشان تاخذ المفتاح. إذا تنحنح كبير القرية، اترك بسرعة لأنه بيلتفت عليك."]], startSteal);
   }
   function startSteal() {
-    state = "steal"; holdBtn = false;
+    state = "steal"; holdBtn = false; cine = majWide();
     stl = { prog: 0, sus: Math.min(2, (ate ? 0 : 1) + (peek ? 1 : 0) + (fazaa === "no" ? 1 : 0)), g: "away", tm: 0, next: 1.8, locked: false, reach: 0 };
     majlis.userData.key.visible = true;
     playUI(false); $("hud").hidden = false; $("jumpb").hidden = false; $("jumpb").textContent = "مد يدك";
@@ -1644,6 +1741,8 @@
     if (s.g === "away") { s.next -= dt; if (s.next <= 0) { s.g = "warn"; s.tm = warnT; bark("(كبير القرية يتنحنح…)"); } }
     else { s.tm -= dt; if (s.tm <= 0) { if (s.g === "warn") { s.g = "look"; s.tm = rnd(1, 1.8); } else { s.g = "away"; s.next = ate ? rnd(.8, 1.8) : rnd(1.2, 2.6); } } }
     elder.rotation.y = lerpAng(elder.rotation.y, s.g === "look" ? -1.2 : s.g === "warn" ? -.3 : .9, Math.min(1, dt * 8));
+    // الشخصية الواقعية: يلف راسه وكتوفه شوي عشان يبان إنه يطالعك
+    majPeople.elder.userData.headYaw = elder.rotation.y * .85; majPeople.elder.rotation.y = elder.rotation.y * .3;
     const reaching = (holdBtn || keys.Space) && !s.locked;
     s.reach += ((reaching ? 1 : 0) - s.reach) * Math.min(1, dt * 10);
     const arm = majPeople.man.userData.armL; arm.rotation.x = -.5 * (1 - s.reach); arm.rotation.z = -s.reach * 2.1;
@@ -1707,7 +1806,15 @@
   }
   function updateVillage(dt) {
     // الناس اللي يمشون في المشهد
-    if (gateDoor) gateDoor.rotation.y += (gateTarget - gateDoor.rotation.y) * Math.min(1, dt * gateRate);
+    // البوابة تفتح وتسكّر بشويش: سرعة ثابتة وتهدى قرب النهاية
+    if (gateDoor) {
+      const gd = gateTarget - gateDoor.rotation.y, ga = Math.abs(gd);
+      if (ga > .002) {
+        const sp = gateRate * .2 * (.3 + .7 * Math.min(1, ga / .45));
+        gateDoor.rotation.y += Math.sign(gd) * Math.min(ga, sp * dt);
+        if (!gateCreak && ga > .2) { gateCreak = true; creak(Math.min(5, ga / sp + .6)); }
+      } else gateCreak = false;
+    }
     npcs.forEach(n => {
       if (n.delay > 0) { n.delay -= dt; return; }
       if (n.path && n.path.length) { n.tx = n.path[0][0]; n.tz = n.path[0][1]; }
@@ -2252,7 +2359,7 @@
     const R = makeWellRoom(); useSet(R); setTime("indoor");
     man.visible = false; P2.still = true; px = 0; pz = 0;
     const salem = put(man2(Object.assign({ sit: true }, LOOK.salemPoor)), -2.1, -.9, Math.PI / 2);
-    const guard = put(man2({ thobe: "#ebe6dc", shemagh: "dark", sit: true }), 1.8, 1.6, 0, .34);
+    const guard = put(man2({ thobe: "#ebe6dc", shemagh: "dark", sit: true, real: "guard" }), 1.8, 1.6, 0, .34);
     const c = document.createElement("canvas"); c.width = 256; c.height = 160;
     const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding;
     const card = new THREE.Mesh(new THREE.PlaneGeometry(.38, .24), new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }));
@@ -2505,8 +2612,8 @@
     const S = makeMarket(); useSet(S); setTime("day");
     px = -1.2; pz = 27.5; yaw = 0; camYaw = 0; setHero({ shemagh: "dark" });
     const badr = put(man2(LOOK.badr), 1.2, 28, Math.PI);
-    const dallal = put(man2({ thobe: "#e6e1d6", shemagh: "red", beard: "#2a211b", real: "villager" }), 5.6, .6, Math.PI - .5);
-    [[-12, 1.6], [-9.5, 2.2], [-7.4, 1.4], [8.4, 1.8], [10.8, 1.3], [13.5, 2.4]].forEach(([x, z], i) => put(man2({ thobe: ["#f5f2eb", "#ece7dd", "#f0ece3"][i % 3], shemagh: i % 2 ? "red" : "white", beard: "#2a211b", real: "villager" }), x, z, Math.PI + rnd(-.3, .3)));
+    const dallal = put(man2({ thobe: "#e6e1d6", shemagh: "red", beard: "#2a211b", real: "v_mid" }), 5.6, .6, Math.PI - .5);
+    [[-12, 1.6], [-9.5, 2.2], [-7.4, 1.4], [8.4, 1.8], [10.8, 1.3], [13.5, 2.4]].forEach(([x, z], i) => put(man2({ thobe: ["#f5f2eb", "#ece7dd", "#f0ece3"][i % 3], shemagh: i % 2 ? "red" : "white", beard: "#2a211b", real: ["villager", "v_young", "v_heavy", "v_old", "v_bedu", "v_tall"][i] }), x, z, Math.PI + rnd(-.3, .3)));
     MK = { S, badr, dallal, lot: [], found: 0, sus: 0 };
     if (retry) { badr.position.set(-2.4, 0, 1.4); return marketGame(); }
     banner(...CH2.market); noraMsg("market");
@@ -2573,7 +2680,7 @@
   function marketWin() {
     P2.tick = null; P2.btn = null; $("bview").hidden = true; ui2({});
     setPath("market", MK.sus > 0 ? "noticed" : "clean");
-    const seller = put(man2({ thobe: "#f5f2eb", shemagh: "dark", beard: "#241c16", real: "villager" }), 6.5, 2.6, -Math.PI / 2);
+    const seller = put(man2({ thobe: "#f5f2eb", shemagh: "dark", beard: "#241c16", real: "guard" }), 6.5, 2.6, -Math.PI / 2);
     walkN(seller, [[3.2, 2.4]], 1.2, 0, null, [px, pz]);
     say([
       ["بدر", "(يهمس) ثلاث منها أعرفها بعيوني… هذي «الوضحا»، وهذي «شعلة». حلالنا.", () => faceShot(MK.badr, 2.2, .6)],
@@ -2971,7 +3078,7 @@
     begin("jail");
     const S = makeJail(); useSet(S); setTime("indoor"); P2.keepHud = true;
     px = -1.5; pz = -1.35; yaw = Math.PI; setHero({ sit: true, shemagh: "none" }); P2.still = true;
-    const cell = put(man2({ thobe: "#f0ece3", shemagh: "none", beard: "#9a9288", sit: true }), 1.4, -1.25, -.55);
+    const cell = put(man2({ thobe: "#f0ece3", shemagh: "none", beard: "#9a9288", sit: true, real: "prisoner" }), 1.4, -1.25, -.55);
     const off = put(man2(LOOK.officer), 1.2, 3.0, Math.PI);
     JL = { S, cell, off, days: 1, found: 0, call: null };
     ui2({ bar: "الأفكار", right: "أيام التوقيف" }); P2.bar = 0; $("left").textContent = AR(1); tally();
@@ -3170,8 +3277,8 @@
     begin("court");
     const S = makeCourt(); useSet(S); setTime("indoor"); P2.keepHud = true;
     px = -4.6; pz = -.7; yaw = 0; setHero({ shemagh: "none" });
-    const J = [-1.8, 0, 1.8].map(x => put(man2({ thobe: "#ebe6dc", shemagh: "white", beard: "#cfc8bd", bisht: "#1f1a17", sit: true }), x, -5.2, 0, 1.05));
-    const law = put(man2(LOOK.lawyer), -3.4, -.35, Math.PI), pros = put(man2({ thobe: "#e6e1d6", shemagh: "white", beard: "#3a3027", real: "villager" }), 3.6, -.5, Math.PI);
+    const J = [-1.8, 0, 1.8].map((x, i) => put(man2({ thobe: "#ebe6dc", shemagh: "white", beard: "#cfc8bd", bisht: "#1f1a17", sit: true, real: ["judge2", "judge", "judge3"][i] }), x, -5.2, 0, 1.05));
+    const law = put(man2(LOOK.lawyer), -3.4, -.35, Math.PI), pros = put(man2({ thobe: "#e6e1d6", shemagh: "white", beard: "#3a3027", real: "prosecutor" }), 3.6, -.5, Math.PI);
     const dh = put(man2(LOOK.dhiyab), 4.9, -.2, Math.PI + .25);
     const nr = put(nora({ sit: true }), -2.4, 2.7, Math.PI, .45), um = put(umm({ sit: true }), -3.2, 2.7, Math.PI, .45);
     const ow = put(man2(Object.assign({ sit: true }, LOOK.owner)), 2.6, 2.7, Math.PI, .45);
@@ -3460,7 +3567,7 @@
   build();
   camPos.set(5.5, groundY(0, 0) + 3.2, 11);
   titleCard();
-  loadReal(); loadCamel();
+  loadReal(); loadCamel(); loadVO();
   requestAnimationFrame(frame);
 })();
 </script>
