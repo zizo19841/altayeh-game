@@ -70,6 +70,19 @@
   @keyframes ban { 0% { opacity: 0; transform: translateY(8px); } 15%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
   .toast { position: absolute; top: 48px; inset-inline-end: 10px; max-width: min(300px, 70%); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: .86rem; line-height: 1.6; pointer-events: none; }
   .toast b { display: block; color: var(--saffron); font-family: var(--display); font-size: .8rem; font-weight: 500; }
+  .rawi { position: absolute; top: 36%; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(78%, 520px); background: rgba(24, 17, 10, .78); border: 1px solid rgba(227, 167, 60, .55); border-radius: 12px; padding: 7px 14px 9px; text-align: center; pointer-events: none; font-size: .92rem; line-height: 1.65; }
+  .rawi b { display: block; color: var(--saffron); font-family: var(--display); font-size: .78rem; font-weight: 500; }
+  .stars { position: absolute; top: calc(20% + 86px); left: 0; right: 0; text-align: center; pointer-events: none; text-shadow: 0 2px 12px rgba(0, 0, 0, .7); }
+  .stars .ss { color: var(--saffron); font-size: 1.9rem; letter-spacing: .12em; }
+  .stars .sk { color: var(--cotton); font-size: .85rem; }
+  .stars.go { animation: ban 3.4s ease both; }
+  .sndb { font: inherit; font-size: .8rem; color: var(--cotton); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+  .sndb:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+  .chgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; text-align: center; }
+  .card .chgrid button { margin: 0; padding: 6px 4px; font-size: .85rem; display: flex; flex-direction: column; gap: 1px; align-items: center; background: var(--cotton); }
+  .card .chgrid button small { font-family: var(--body, inherit); font-size: .66rem; opacity: .7; }
+  .card .chgrid button i { font-style: normal; color: #b0711a; letter-spacing: .05em; }
+  .card .chgrid button:disabled { opacity: .45; cursor: default; }
   .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity .4s ease; }
   .mirror { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); width: min(40%, 280px); aspect-ratio: 3 / 1; border: 4px solid #1b1918; border-radius: 12px; box-shadow: 0 4px 14px rgba(0, 0, 0, .5); pointer-events: none; }
   .bview { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); width: 88px; height: 88px; border-radius: 50%; pointer-events: none; }
@@ -93,6 +106,7 @@
   <header>
     <h1>التايه</h1>
     <p>الجزء الأول والثاني بالأبعاد الثلاثية. حرّك بالعصا أو الأسهم، والزر أو المسافة للقفز والأفعال، واسحب الشاشة عشان تلف الكاميرا.</p>
+    <button class="sndb" id="sndb" type="button" aria-label="الصوت">🔊 الراوي</button>
   </header>
   <div class="stage" id="stage">
     <div class="hud" id="hud" hidden>
@@ -104,6 +118,8 @@
     <div class="mirror" id="mirror" hidden></div>
     <canvas class="bview" id="bview" width="96" height="96" hidden></canvas>
     <div class="ban" id="ban" hidden><div class="bk" id="ban-k"></div><div class="bt" id="ban-t"></div></div>
+    <div class="stars" id="stars" hidden><div class="ss" id="stars-s"></div><div class="sk" id="stars-k"></div></div>
+    <div class="rawi" id="rawi" hidden><b>الراوي</b><span id="rawi-t"></span></div>
     <div class="toast" id="toast" hidden><b>رسالة من نورة</b><span id="toast-t"></span></div>
     <div class="flash" id="flash"></div>
     <div class="fade" id="fade"></div>
@@ -1162,6 +1178,143 @@
     VO.cur = a; return 1;
   }
 
+
+  // ------- الراوي البدوي، وأصوات البر، والنجوم -------
+  const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  // ٠ الراوي والبر، ١ الراوي والشخصيات، ٢ صامت
+  const SND = { mode: Math.min(2, Math.max(0, +(lsGet("altayeh3d-snd") || 0) || 0)) };
+  const SND_L = ["🔊 الراوي", "🔊 الراوي والشخصيات", "🔇 صامت"];
+  VO.on = SND.mode === 1;
+  const RAWI_T = {"title": "يا حيّ الله من جانا! اسمع يا نشمي: هذي سالفة رجّال تاه في النفود، والعطش يلاحقه، وبنته تنتظره. وش بتسوي لو كنت مكانه؟ يالله، خلنا نشوف معدنك!", "c1": "النفود بحر رمل ما له آخر، والشمس ما ترحم أحد. بس الرجّال يمشي مع الجدي، ولا يلتفت. شد حيلك يا ولد!", "half": "نص الطريق ورا ظهرك! لا توقف الحين، ترى الوقفة في هالبر تذبح!", "thirst": "المويه تخلص يا نشمي! الخطوة ثقلت، والراس دار. بس اللي وراه بنت تنتظره، ما يطيح!", "c2": "ناقة طايحة في وسط البر، ومويتك على قدّك. هنا يبان الطيب من غيره. وش بتسوي؟", "camelup": "الله أكبر! سقيتها من مويتك، وقامت تشيلك! هذي سلوم العرب، والفزعة ما تضيع!", "c3": "قرية طين في آخر الدنيا، وفوانيسها تلمع. بس انتبه يا ولد، مو كل ضو أمان!", "c4": "المجلس مليان، والدلال على الجمر، وكل العيون عليك. القهوة كرم، بس إذا ما تعرف أهلها، رد الفنجال بأدب!", "key": "أخذته! والله إنك ذيب! والحين اصبر، لين تنام القرية.", "c5": "الليل ستر، والحارس فوق البرج بكشافه. امش مثل الظل، وخل البيوت بينك وبين الضو. الحين وقتك!", "flee": "اركض يا ولد! اركضي يالغالية! القوم وراكم، لا تلتفتون!", "end1": "وصل التايه، ونورة واقفة عند الباب! بس السالفة ما خلصت يا نشمي. اللي جاي أكبر!", "well": "ليلة سودا في قعر البير، ورجّال محبوس ينتظر الفرج. فحمة وكرتون، وعين على الحارس. اكتب يا سالم، اكتب!", "salem": "الحين أنت سالم! والغالية هي الوحيدة اللي تعرف طريق الديرة. طلّعها، ولا يلمحك الكشاف!", "market": "سوق الحلال! رغا الإبل، وصياح الدلالين. عينك على الوسم، الحق ما يضيع وسط الزحمة!", "station": "آخر محطة قبل النفود، وصاحبها يبتسم لك. اسأل بهدوء، وخل عيونك تشتغل قبل لسانك.", "highway": "الليل على الخط، وأنوار ذياب لاصقة فيك! غيّر مسارك، وانتبه للجمال السايبة. لا يلحقك!", "jail": "التوقيف ما هو نهاية الرجّال. حقك تتصل، وحقك محامي. خلك ثابت يا مشعل!", "feed": "الحين دورك يا نورة! الترند يغلي، وفيه شهود صادقين، وفيه حسابات تدوّر بيتكم. احمي أهلك!", "court": "يوم الحق! القاضي يسمع، والدليل يتكلم. رتّب حجتك يا مشعل، ترى ما ضاع حق وراه مطالب!", "after": "دارت الأيام، والحوار كبر، والفزعة رجعت لأهلها. حيّ الله المجالس الطيبة!", "fin": "سنة كاملة، والنفود تنادي من جديد. بس هالمرة، التايه يعرف الطريق!", "end2": "وهذي سالفة مشعل يا نشمي: فزع لناقة، وفزعت له الدنيا كلها. والطيب ما يضيع، لو طال الزمن!", "fail1": "طحت؟ ما عليه! الذيب يطيح ويقوم. قم وجرّب مرة ثانية!", "fail2": "لا يضيق صدرك يا ولد، كل فارس له كبوة. يالله، ثانية!", "fail3": "عز الله إنك قريب! بس شوي صبر، وتطلع منها مرفوع الراس!", "fail4": "الصبر مفتاح الفرج! ركّز هالمرة، وأنا أشهد إنك قدها!", "fail5": "ما يعيب الطيحة، يعيب اللي ما يقوم منها. قم يا نشمي!", "star3": "ولا غلطة! هذا شغل الذيابة! ثلاث نجوم، وحلاوتها!"};
+  const RAWI = { cur: null, q: [], said: {} };
+  function narrate(k, now) {
+    if (SND.mode === 2 || !RAWI_T[k]) return;
+    if (now) { RAWI.q = []; if (RAWI.cur) { RAWI.cur.onended = null; RAWI.cur.pause(); RAWI.cur = null; } }
+    if (RAWI.cur) { if (RAWI.q.length < 2 && !RAWI.q.includes(k)) RAWI.q.push(k); return; }
+    const a = new Audio("assets/vo/n_" + k + ".mp3"); a.volume = 1;
+    RAWI.cur = a; $("rawi-t").textContent = RAWI_T[k]; $("rawi").hidden = false; AMB.duck = true;
+    const end = () => {
+      if (RAWI.cur !== a) return;
+      RAWI.cur = null; $("rawi").hidden = true; AMB.duck = false;
+      const n = RAWI.q.shift(); if (n) setTimeout(() => narrate(n), 400);
+    };
+    a.onended = end; a.onerror = end;
+    const p = a.play(); if (p && p.catch) p.catch(end);
+  }
+  function rawiOnce(k) { if (RAWI.said[k]) return; RAWI.said[k] = 1; narrate(k); }
+  function rawiStop() { RAWI.q = []; if (RAWI.cur) { RAWI.cur.onended = null; RAWI.cur.pause(); RAWI.cur = null; } $("rawi").hidden = true; AMB.duck = false; }
+  function setSnd(m) {
+    SND.mode = m; lsSet("altayeh3d-snd", String(m)); VO.on = m === 1;
+    if (m === 2) { rawiStop(); voice("", ""); }
+    $("sndb").textContent = SND_L[m];
+  }
+
+  // أصوات البر: ريح، وخطوات في الرمل، ودقات قلب إذا قربت المويه تخلص، وطبل مع عنوان كل فصل
+  const AMB = { on: false, wg: null, nb: null, step: 0, beat: 0, lx: 0, lz: 0, duck: false };
+  function ambStart() {
+    const a = actx(); if (!a || AMB.on) return; AMB.on = true;
+    const n = a.sampleRate * 2, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    AMB.nb = b;
+    const src = a.createBufferSource(); src.buffer = b; src.loop = true;
+    const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 420; f.Q.value = .8;
+    const lfo = a.createOscillator(), lg = a.createGain(); lfo.frequency.value = .08; lg.gain.value = 240; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+    const g = a.createGain(); g.gain.value = 0;
+    src.connect(f); f.connect(g); g.connect(a.destination); src.start();
+    AMB.wg = g;
+  }
+  function thump(t0, f0, vol, len) {
+    const a = AC; if (!a) return;
+    const o = a.createOscillator(), g = a.createGain();
+    o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f0 * .55, t0 + (len || .25));
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.001, t0 + (len || .25));
+    o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0 + (len || .25) + .05);
+  }
+  function hiss(t0, len, freq, vol, type) {
+    const a = AC; if (!a || !AMB.nb) return;
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    s.buffer = AMB.nb; f.type = type || "lowpass"; f.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.001, t0 + len);
+    s.connect(f); f.connect(g); g.connect(a.destination); s.start(t0, Math.random()); s.stop(t0 + len + .02);
+  }
+  // طار: دم… تك… دم
+  function drum() {
+    const a = actx(); if (!a || SND.mode === 2) return; ambStart();
+    const t0 = a.currentTime + .02;
+    thump(t0, 92, .5, .45); hiss(t0, .05, 2400, .12, "highpass");
+    hiss(t0 + .3, .09, 3200, .16, "bandpass");
+    thump(t0 + .6, 84, .42, .5); hiss(t0 + .6, .05, 2400, .1, "highpass");
+  }
+  function ambTick(dt) {
+    if (!AMB.on || !AC) return;
+    const a = AC, mute = SND.mode === 2, indoor = !!(majlis && majlis.visible);
+    const target = mute ? 0 : (indoor ? .006 : .04) * (AMB.duck ? .45 : 1);
+    AMB.wg.gain.setTargetAtTime(target, a.currentTime, .6);
+    if (!man || mute) return;
+    // خطوات في الرمل على قد السرعة
+    const sp = Math.hypot(px - AMB.lx, pz - AMB.lz) / Math.max(dt, 1e-3); AMB.lx = px; AMB.lz = pz;
+    if (man.visible && !riding && sp > .7 && sp < 15 && !indoor) {
+      AMB.step -= dt * Math.min(2.4, sp / 1.5);
+      if (AMB.step <= 0) { AMB.step = .5; hiss(a.currentTime, .09, 650 + Math.random() * 300, .05); }
+    }
+    // دقات القلب لما تقرب المويه تخلص
+    if (state === "play" && !P2.on && !riding && water < 25) {
+      AMB.beat -= dt;
+      if (AMB.beat <= 0) { AMB.beat = water < 12 ? .72 : 1.05; thump(a.currentTime, 55, .35, .18); thump(a.currentTime + .18, 50, .25, .18); }
+      rawiOnce("thirst");
+    }
+    if (state === "play" && !P2.on && !riding && -pz > 170) rawiOnce("half");
+  }
+
+  // ------- الفصول والنجوم -------
+  const ORDER = ["c1", "c2", "c3", "c4", "c5", "well", "salem", "market", "station", "highway", "jail", "feed", "court", "after", "fin"];
+  const CH1 = { c1: ["الفصل الأول", "التايه"], c2: ["الفصل الثاني", "الغالية"], c3: ["الفصل الثالث", "القرية"], c4: ["الفصل الرابع", "العشاء"], c5: ["الفصل الخامس", "الهروب"] };
+  let PROG = { stars: {}, reach: {} };
+  try { PROG = Object.assign({ stars: {}, reach: {} }, JSON.parse(lsGet("altayeh3d-prog") || "{}")); } catch (e) {}
+  const saveProg = () => lsSet("altayeh3d-prog", JSON.stringify(PROG));
+  let curCh = null, chFail = 0, chSkip = false;
+  const starStr = n => "★".repeat(n) + "☆".repeat(3 - n);
+  function enterCh(k) {
+    if (curCh === k) return;
+    if (curCh && ORDER.indexOf(k) === ORDER.indexOf(curCh) + 1) finishCh(curCh);
+    curCh = k; chFail = 0; chSkip = false; PROG.reach[k] = 1; saveProg();
+    if (CH1[k]) banner(CH1[k][0], CH1[k][1]);
+    drum(); narrate(k);
+  }
+  function finishCh(k) {
+    if (chSkip) return;
+    const n = chFail === 0 ? 3 : chFail <= 2 ? 2 : 1;
+    PROG.stars[k] = Math.max(PROG.stars[k] || 0, n); saveProg();
+    const nm = CH1[k] || CH2[k];
+    $("stars-s").textContent = starStr(n); $("stars-k").textContent = (nm ? nm[1] : "") + (n === 3 ? " · بدون ولا غلطة" : "");
+    const e = $("stars"); e.hidden = false; e.classList.remove("go"); void e.offsetWidth; e.classList.add("go");
+    clearTimeout(finishCh.tm); finishCh.tm = setTimeout(() => { e.hidden = true; }, 3400);
+    if (n === 3) narrate("star3");
+  }
+  function failNote() {
+    chFail++;
+    setTimeout(() => narrate("fail" + (1 + Math.floor(Math.random() * 5)), true), 450);
+  }
+  function chapterMenu() {
+    showCard("سجل التايه", "الفصول", "كل فصل تخلّصه ياخذ نجوم: ثلاث إذا ما غلطت ولا مرة. فصول الجزء الثاني تقدر تبدأ منها إذا وصلت لها.", "رجوع", titleCard);
+    const g = document.createElement("div"); g.id = "chgrid"; g.className = "chgrid";
+    let total = 0;
+    ORDER.forEach((k, i) => {
+      const nm = CH1[k] || CH2[k], st = PROG.stars[k] || 0, open = k === "c1" || (!CH1[k] && (PROG.reach[k] || k === "well" && PROG.reach.c5));
+      total += st;
+      const b = document.createElement("button"); b.type = "button"; b.disabled = !open;
+      b.innerHTML = "<small></small><span></span><i></i>";
+      b.children[0].textContent = nm[0].replace("الجزء الثاني · ", "").replace(" · بعد سنة", "");
+      b.children[1].textContent = open || CH1[k] ? nm[1] : "؟؟؟";
+      b.children[2].textContent = starStr(st);
+      if (open) b.onclick = e => { e.stopPropagation(); $("ov").hidden = true; if (k === "c1") start(); else goChapter(START2[k]); };
+      g.appendChild(b);
+    });
+    $("ov-s").textContent += " نجومك: " + AR(total) + " من " + AR(ORDER.length * 3) + ".";
+    $("ov-s").after(g);
+  }
+
   function say(lines, done, choices) {
     if (P2.on && P2.keepHud) { $("joy").hidden = $("jumpb").hidden = true; endJoy(); } else playUI(false);
     dialog = { lines, i: -1, done, choices, shown: 0, full: "" };
@@ -1205,7 +1358,7 @@
     playUI(false);
     $("ov-k").textContent = k; $("ov-t").textContent = tt; $("ov-s").textContent = s;
     $("ov-b").hidden = false; $("ov-b").textContent = label; $("ov-b").onclick = e => { e.stopPropagation(); $("ov").hidden = true; fn(); };
-    const old = $("ov-b2"); if (old) old.remove();
+    ["ov-b2", "ov-b3", "chgrid"].forEach(id => { const o = $(id); if (o) o.remove(); });
     if (label2) {
       const b = document.createElement("button"); b.type = "button"; b.id = "ov-b2"; b.textContent = label2;
       b.style.background = "var(--cotton)";
@@ -1227,6 +1380,7 @@
   function start() {
     leavePart2();
     build(); state = "intro";
+    rawiOnce("title"); enterCh("c1");
     say(INTRO.slice(0, 3), () => { state = "fix"; seq = { t: 0, step: 0, said: 0 }; });
   }
   function afterFix() {
@@ -1234,13 +1388,13 @@
   }
   function fail(sub, retry, title, kicker) {
     // داخل المجلس تبقى الكاميرا على المجلس (لا ترجع لبرا القرية)
-    state = "fail"; if (!(majlis && majlis.visible)) cine = null;
+    state = "fail"; if (!(majlis && majlis.visible)) cine = null; failNote();
     showCard(kicker || "الفصل الأول: التايه", title || "خلصت المويه…", sub || "العطش والتعب غلبوه… ونورة تنتظر. امشِ شمال على طول، ولا تطلع الطعوس العالية، وابعد عن العوسج.", "حاول مرة ثانية", retry || start);
   }
 
   // ------- الناقة: منهكة، تسقيها، وتفزع لك -------
   function meetCamel() {
-    state = "meet"; savedWater = water;
+    state = "meet"; savedWater = water; enterCh("c2");
     const give = Math.max(0, Math.min(30, Math.floor(water) - 8));
     say([
       ["مشعل", "…ناقة؟! لحالها في هالبر؟ …وباركة؟"],
@@ -1269,6 +1423,7 @@
     state = "rise"; seq = { t: 0 };
   }
   function camelUp() {
+    narrate("camelup");
     say([
       ["مشعل", "(شربت… ورفعت راسها. وبعدها قامت على رجولها!)"],
       ["مشعل", "الحمد لله… الله يعطيك العافية يالغالية."],
@@ -1343,6 +1498,7 @@
     }
     if (man) (P2.on ? update2 : update)(dt);
     realTick(dt);
+    ambTick(dt);
     updatePuffs(dt);
     renderer.render(scene, camera);
     if (P2.on && P2.mirror) renderMirror();
@@ -1625,7 +1781,7 @@
 
   // ------- الفصل الثالث: القرية -------
   function arriveVillage() {
-    state = "varrive"; playUI(false); riding = false;
+    state = "varrive"; playUI(false); riding = false; enterCh("c3");
     const gx = VIL_X, gz = VIL_Z + WALL + 9;
     px = gx + .9; pz = gz; yaw = 0;
     camel.position.set(gx - 2.4, groundY(gx - 2.4, gz + 1.5), gz + 1.5); camel.rotation.y = .3; camel.userData.setPose(1, 1);
@@ -1676,7 +1832,7 @@
 
   // ------- الفصل الرابع: العشاء -------
   function enterMajlis() {
-    state = "majlis"; setTime("indoor"); majlis.visible = true;
+    state = "majlis"; setTime("indoor"); majlis.visible = true; enterCh("c4");
     npcs.forEach(n => { n.o.visible = false; });
     resetCoffee();
     const at2 = (x, y, z) => MAJ.clone().add(V(x, y, z));
@@ -1758,7 +1914,7 @@
     if (!(holdBtn || keys.Space)) s.locked = false;
     $("left").textContent = "●".repeat(s.sus) + "○".repeat(Math.max(0, 3 - s.sus));
     if (s.prog >= 100) {
-      state = "stolen"; majlis.userData.key.visible = false; arm.rotation.set(-.5, 0, 0);
+      state = "stolen"; majlis.userData.key.visible = false; arm.rotation.set(-.5, 0, 0); narrate("key");
       say([
         ["مشعل", "(المفتاح في جيبي… ولا أحد انتبه. على ما أظن.)"],
         ["كبير القرية", "الوقت تأخر. قوموا ودّوا الضيف ينام… وسكّروا عليه زين."],
@@ -1769,7 +1925,7 @@
 
   // ------- الفصل الخامس: الهروب -------
   function startSneak(retry) {
-    majlis.visible = false; setTime("night"); cine = null; riding = false;
+    majlis.visible = false; setTime("night"); cine = null; riding = false; enterCh("c5");
     npcs.forEach(n => drop(n.o)); npcs = []; pursuers.forEach(p => drop(p.o)); pursuers = [];
     if (!rects.includes(gateRect)) rects.push(gateRect);
     gateDoor.rotation.y = 0; gateTarget = 0; gateRate = 2.2; lockProg = 0; expo = 0;
@@ -1860,7 +2016,7 @@
     }
     shake = REDUCED ? 0 : .4;
     bark("كبير القرية: «الناقة! لا يروح بالناقة!» …طلقة! اركضي يالغالية!");
-    state = "flee"; playUI(true); $("jumpb").hidden = true; $("bar-k").textContent = "بعدهم عنك"; $("left-k").textContent = "مشيت";
+    state = "flee"; playUI(true); $("jumpb").hidden = true; narrate("flee"); $("bar-k").textContent = "بعدهم عنك"; $("left-k").textContent = "مشيت";
   }
 
   function retryFlee() {
@@ -1872,6 +2028,7 @@
   }
   function finishPart1() {
     state = "fin1"; playUI(false); fadeTo(true);
+    if (curCh === "c5") finishCh("c5"); curCh = "end1"; narrate("end1", true);
     pursuers.forEach(p => drop(p.o)); pursuers = [];
     const n = Object.keys(clues).length, kind = n >= 4 ? "true" : ate ? "robbed" : "normal";
     const base = [
@@ -2212,7 +2369,7 @@
   function goChapter(fn) { playUI(false); fadeTo(true, () => { fn(); fadeTo(false); }); }
   function begin(key) {
     Object.assign(P2, { on: true, key, tick: null, amb: null, still: false, walk: false, btn: null, tap: null, bar: null, low: false, mirror: false, keepHud: false, sunAt: null });
-    state = "p2"; dialog = null; $("dlg").hidden = true; $("ov").hidden = true;
+    state = "p2"; dialog = null; $("dlg").hidden = true; $("ov").hidden = true; enterCh(key);
     ["feed", "bview", "mirror", "zone", "toast"].forEach(id => { $(id).hidden = true; });
     $("bark").style.top = ""; $("water").classList.remove("low");
     cine = null; riding = false; alt = 0; vy = 0; holdBtn = false; water = 100; stumble = 0; expo = 0;
@@ -2234,15 +2391,19 @@
   function failP2(kicker, title, sub, retry, skip) {
     P2.tick = null; P2.walk = false; P2.tap = null; P2.btn = null; P2.mirror = false;
     ["feed", "bview", "mirror", "zone"].forEach(id => { $(id).hidden = true; });
-    fails[P2.key] = (fails[P2.key] || 0) + 1;
+    fails[P2.key] = (fails[P2.key] || 0) + 1; failNote();
     const canSkip = skip && fails[P2.key] >= 3;
     showCard(kicker, title, sub, "حاول مرة ثانية", () => fadeTo(true, () => { retry(); fadeTo(false); }),
-      canSkip ? "تخطّ المرحلة" : null, canSkip ? () => fadeTo(true, () => { skip(); fadeTo(false); }) : null);
+      canSkip ? "تخطّ المرحلة" : null, canSkip ? () => fadeTo(true, () => { chSkip = true; skip(); fadeTo(false); }) : null);
   }
   function titleCard() {
     const saved = store.get("altayeh3d-ch"), c = saved && CH2[saved];
     showCard("الجزء الأول والثاني بالأبعاد الثلاثية", "التايه", "آخر موسم الفقع، والسيارة غارزة في النفود، ومعك جالون مويه ما يكفي لبكرة. أنت مشعل: امشِ شمال مع الفجر، ودوّر أي أثر ينقذك.",
       "ابدأ من الأول", start, c ? "كمّل: " + c[0].replace("الجزء الثاني · ", "") + " · " + c[1] : "الجزء الثاني", () => goChapter(START2[c ? saved : "well"]));
+    const b = document.createElement("button"); b.type = "button"; b.id = "ov-b3"; b.textContent = "الفصول والنجوم ★";
+    b.style.background = "transparent"; b.style.color = "var(--saffron)"; b.style.border = "1px solid var(--saffron)";
+    b.onclick = e => { e.stopPropagation(); chapterMenu(); };
+    ($("ov-b2") || $("ov-b")).after(b);
   }
 
   // ------- كل إطار في الجزء الثاني -------
@@ -3512,6 +3673,7 @@
       });
     };
     const finish = () => say(recap(), () => {
+      if (curCh === "fin") finishCh("fin"); curCh = "end2"; narrate("end2", true);
       const E2 = ENDINGS2[end2], got = new Set((store.get("altayeh3d-end2") || "").split(",").filter(Boolean)); got.add(end2); store.set("altayeh3d-end2", [...got].join(","));
       store.set("altayeh3d-ch", "well");
       showCard("نهاية الجزء الثاني: " + E2.k, E2.t, E2.s + " نهايات الجزء الثاني: " + AR(got.size) + " من ٤. بس المشتري الكبير… للحين حر. والجزء الثالث بالأبعاد الثلاثية جاي.",
@@ -3568,6 +3730,10 @@
   camPos.set(5.5, groundY(0, 0) + 3.2, 11);
   titleCard();
   loadReal(); loadCamel(); loadVO();
+  $("sndb").textContent = SND_L[SND.mode];
+  $("sndb").onclick = e => { e.stopPropagation(); ambStart(); setSnd((SND.mode + 1) % 3); };
+  const firstTouch = () => { ambStart(); window.removeEventListener("pointerdown", firstTouch, true); window.removeEventListener("keydown", firstTouch, true); };
+  window.addEventListener("pointerdown", firstTouch, true); window.addEventListener("keydown", firstTouch, true);
   requestAnimationFrame(frame);
 })();
 </script>
