@@ -40,11 +40,14 @@
   .bar i { display: block; height: 100%; width: 100%; background: var(--saffron); transition: width .2s linear; }
   .bar i.low { background: var(--ember); }
   /* الكلام كله فوق عشان ما يغطي اللعب */
-  .topstack { position: absolute; top: 48px; left: 10px; right: 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
-  .dlg { position: relative; align-self: stretch; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 12px; pointer-events: none; }
-  .dlg .who { color: var(--saffron); font-family: var(--display); font-size: .95rem; }
-  .dlg .txt { font-size: 1.02rem; line-height: 1.7; min-height: 1.7em; text-wrap: pretty; }
-  .dlg .next { color: var(--muted); font-size: .75rem; }
+  /* شريط الكلام: تحت اللعبة، برا الصورة، فما يغطي شي */
+  .talk { flex: none; box-sizing: border-box; height: clamp(78px, 16vh, 132px); overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 12px; background: rgba(28, 23, 20, .55); cursor: pointer; user-select: none; -webkit-user-select: none; }
+  .talk .idle { margin: auto; color: var(--muted); font-size: .75rem; opacity: .55; }
+  .talk:has(> :not(.idle):not([hidden])) .idle { display: none; }
+  .dlg { position: relative; align-self: stretch; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px 8px; }
+  .dlg .who { color: var(--saffron); font-family: var(--display); font-size: .8rem; }
+  .dlg .txt { font-size: .9rem; line-height: 1.6; min-height: 1.6em; text-wrap: pretty; }
+  .dlg .next { color: var(--muted); font-size: .68rem; }
   .dlg.tip .who { color: #9fd3a2; }
   .ov { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(14, 11, 10, .45); }
   .card { max-height: calc(100% - 8px); overflow: auto; box-sizing: border-box; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; max-width: 380px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
@@ -57,25 +60,25 @@
   .joy i { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(243, 232, 212, .78); }
   .jumpb { position: absolute; right: 16px; bottom: 24px; width: 76px; height: 76px; border-radius: 50%; border: 0; background: var(--saffron); color: var(--ink); font-family: var(--display); font-size: 1.1rem; cursor: pointer; touch-action: none; }
   .jumpb:focus-visible { outline: 2px solid var(--cotton); outline-offset: 2px; }
-  .bark { position: relative; background: var(--panel); border-radius: 8px; padding: 6px 12px; font-size: .9rem; max-width: 80%; text-align: center; pointer-events: none; }
+  .bark { position: relative; background: var(--panel); border-radius: 8px; padding: 5px 10px; font-size: .82rem; max-width: 92%; text-align: center; }
   .arrow { display: inline-block; color: var(--saffron); font-weight: 700; font-size: 1rem; }
   .fade { position: absolute; inset: 0; background: #0b0908; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
-  .choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; pointer-events: auto; }
-  .choices button { font: inherit; font-size: .92rem; color: var(--ink); background: var(--cotton); border: 0; border-radius: 9px; padding: 7px 12px; cursor: pointer; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .choices button { font: inherit; font-size: .82rem; color: var(--ink); background: var(--cotton); border: 0; border-radius: 9px; padding: 6px 10px; cursor: pointer; }
   .choices button:first-child { background: var(--saffron); }
   .choices button:focus-visible { outline: 2px solid var(--cotton); outline-offset: 2px; }
   /* الجزء الثاني: عنوان الفصل، ورسالة نورة، والمراية، والوسم المكبّر، والترند */
-  .ban { position: absolute; top: 46%; left: 0; right: 0; text-align: center; pointer-events: none; text-shadow: 0 2px 14px rgba(0, 0, 0, .7); }
-  .ban .bk { color: var(--cotton); font-size: .9rem; opacity: .85; }
-  .ban .bt { font-family: var(--display); font-size: 2.3rem; color: var(--saffron); line-height: 1.2; }
+  .ban { position: absolute; top: 34%; left: 0; right: 0; text-align: center; pointer-events: none; text-shadow: 0 2px 14px rgba(0, 0, 0, .7); }
+  .ban .bk { color: var(--cotton); font-size: .78rem; opacity: .85; }
+  .ban .bt { font-family: var(--display); font-size: 1.6rem; color: var(--saffron); line-height: 1.2; }
   .ban.go { animation: ban 2.8s ease both; }
   @keyframes ban { 0% { opacity: 0; transform: translateY(8px); } 15%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
-  .toast { position: absolute; bottom: 112px; inset-inline-end: 10px; max-width: min(300px, 70%); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-size: .86rem; line-height: 1.6; pointer-events: none; }
-  .toast b { display: block; color: var(--saffron); font-family: var(--display); font-size: .8rem; font-weight: 500; }
-  .rawi { position: relative; max-width: min(78%, 520px); background: rgba(24, 17, 10, .78); border: 1px solid rgba(227, 167, 60, .55); border-radius: 12px; padding: 7px 14px 9px; text-align: center; pointer-events: none; font-size: .92rem; line-height: 1.65; }
-  .rawi b { display: block; color: var(--saffron); font-family: var(--display); font-size: .78rem; font-weight: 500; }
-  .stars { position: absolute; top: calc(46% + 86px); left: 0; right: 0; text-align: center; pointer-events: none; text-shadow: 0 2px 12px rgba(0, 0, 0, .7); }
-  .stars .ss { color: var(--saffron); font-size: 1.9rem; letter-spacing: .12em; }
+  .toast { position: relative; align-self: stretch; background: var(--panel); border: 1px solid rgba(159, 211, 162, .5); border-radius: 10px; padding: 5px 12px; font-size: .8rem; line-height: 1.55; }
+  .toast b { display: block; color: #9fd3a2; font-family: var(--display); font-size: .72rem; font-weight: 500; }
+  .rawi { position: relative; align-self: stretch; background: rgba(24, 17, 10, .78); border: 1px solid rgba(227, 167, 60, .55); border-radius: 10px; padding: 5px 12px 7px; text-align: center; font-size: .82rem; line-height: 1.6; }
+  .rawi b { display: block; color: var(--saffron); font-family: var(--display); font-size: .7rem; font-weight: 500; }
+  .stars { position: absolute; top: calc(34% + 64px); left: 0; right: 0; text-align: center; pointer-events: none; text-shadow: 0 2px 12px rgba(0, 0, 0, .7); }
+  .stars .ss { color: var(--saffron); font-size: 1.5rem; letter-spacing: .12em; }
   .stars .sk { color: var(--cotton); font-size: .85rem; }
   .stars.go { animation: ban 3.4s ease both; }
   .sndb { font: inherit; font-size: .8rem; color: var(--cotton); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
@@ -86,7 +89,7 @@
   .card .chgrid button small { font-family: var(--body, inherit); font-size: .66rem; opacity: .7; }
   .card .chgrid button i { font-style: normal; color: #b0711a; letter-spacing: .05em; }
   .card .chgrid button:disabled { opacity: .45; cursor: default; }
-  .gloss { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--line); font-size: .8rem; line-height: 1.55; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+  .gloss { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--line); font-size: .72rem; line-height: 1.5; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
   .gloss b { color: var(--saffron); font-weight: 600; }
   .rawi .gloss { text-align: start; }
   .glist { display: flex; flex-direction: column; gap: 8px; text-align: start; }
@@ -106,6 +109,7 @@
   .fc.leak { outline: 2px solid var(--ember); }
   .fc.block { opacity: .5; }
   .fc i { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-style: normal; font-weight: 700; font-size: .82rem; }
+  @media (max-width: 640px) { header p { display: none; } .app { gap: 8px; padding-block: 8px; } }
   @media (prefers-reduced-motion: reduce) { .ban.go { animation: none; } .flash { transition: none; } }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -130,20 +134,10 @@
     <canvas class="bview" id="bview" width="96" height="96" hidden></canvas>
     <div class="ban" id="ban" hidden><div class="bk" id="ban-k"></div><div class="bt" id="ban-t"></div></div>
     <div class="stars" id="stars" hidden><div class="ss" id="stars-s"></div><div class="sk" id="stars-k"></div></div>
-    <div class="toast" id="toast" hidden><b>رسالة من نورة</b><span id="toast-t"></span></div>
     <div class="flash" id="flash"></div>
     <div class="fade" id="fade"></div>
     <div class="joy" id="joy" hidden><i id="knob"></i></div>
     <button class="jumpb" id="jumpb" type="button" hidden>قفز</button>
-    <div class="topstack">
-    <div class="dlg" id="dlg" hidden>
-      <div class="who" id="who"></div><div class="txt" id="txt"></div><div class="next" id="next">اضغط للمتابعة</div>
-      <div class="choices" id="choices" hidden></div>
-      <div class="gloss" id="gloss" hidden></div>
-    </div>
-    <div class="bark" id="bark" hidden></div>
-    <div class="rawi" id="rawi" hidden><b>الراوي</b><span id="rawi-t"></span><div class="gloss" id="rgloss" hidden></div></div>
-    </div>
     <div class="ov" id="ov">
       <div class="card">
         <div class="k" id="ov-k">الجزء الأول والثاني بالأبعاد الثلاثية</div>
@@ -153,6 +147,17 @@
       </div>
     </div>
   </div>
+  <section class="talk" id="talk" aria-live="polite">
+    <div class="idle">· · ·</div>
+    <div class="dlg" id="dlg" hidden>
+      <div class="who" id="who"></div><div class="txt" id="txt"></div><div class="next" id="next">اضغط للمتابعة</div>
+      <div class="choices" id="choices" hidden></div>
+      <div class="gloss" id="gloss" hidden></div>
+    </div>
+    <div class="bark" id="bark" hidden></div>
+    <div class="rawi" id="rawi" hidden><b>الراوي</b><span id="rawi-t"></span><div class="gloss" id="rgloss" hidden></div></div>
+    <div class="toast" id="toast" hidden><b>رسالة من نورة</b><span id="toast-t"></span></div>
+  </section>
 </main>
 
 <script>
@@ -1233,7 +1238,7 @@
   const SND = { mode: Math.min(2, Math.max(0, +(lsGet("altayeh3d-snd") || 0) || 0)) };
   const SND_L = ["🔊 الراوي", "🔊 الراوي والشخصيات", "🔇 صامت"];
   VO.on = SND.mode === 1;
-  const RAWI_T = {"title": "يا هلا ومسهلا! اسمعوا يا جماعة الخير، هذي سالفة صارت في النفود، ويقولون إنها صدق. رجّال تاه في بحر رمل، والعطش ينهش فيه، وبنته تنتظره عند الباب. والله ما يدري وش مخبّي له الدرب! يالله يا نشمي، شد حيلك، وخلنا نشوف معدنك!", "c1": "يقول الراوي: طلع مشعل يدوّر الفقع، والسيارة غرّزت، والشمس فوق راسه مثل الجمر. ما معه إلا جالون مويه، ونجمة الجدي. امش يا ولد، ولا تلتفت!", "half": "زين يا نشمي! نص الدرب صار ورا ظهرك. بس اسمعها مني: اللي يوقف في هالبر، البر ياكله!", "thirst": "آه يا العطش! الريق نشف، والخطوة ثقلت، والراس يدور. بس تذكّر نورة واقفة عند الباب، وكمّل!", "c2": "وبين الطعوس، شاف شي ما توقعه: ناقة طايحة، ولسانها ناشف، وحبلها مقطوع. ومويته على قده. هنا يا جماعة، يبان معدن الرجّال!", "camelup": "الله أكبر! سقاها من مويته، وقامت تنفض الرمل عنها، وبركت له تقول: اركب! هذي يا جماعة سلوم العرب، والفزعة ما تضيع!", "c3": "ومع المغرب، بانت قرية طين في آخر الدنيا، وفوانيسها تلمع. فرح مشعل، بس الراوي يقول لك: مو كل ضو يدل على خير!", "c4": "دخل المجلس، والدلال على الجمر، وريحة الهيل والبخور، وكل العيون عليه. القهوة كرم يا نشمي، بس الفنجال اللي ما تعرف صبّابه، رده بأدب!", "key": "أخذه من تحت عينه! والله إنك ذيب ما ينلحق! بس هدّ اللعب، الليل لسه طويل.", "c5": "انتصف الليل، والقرية نايمة، إلا حارس فوق البرج بكشافه. امش مثل الظل يا ولد، وخل البيوت بينك وبين الضو. الحين وقتك!", "flee": "طلقة! اركضي يالغالية، اركضي! القوم وراكم، والليل ستر لكم. لا تلتفتون!", "end1": "ومع الفجر، بانت أنوار الخط، ووصل التايه، ونورة واقفة عند الباب. بس اصبروا علي يا جماعة، السالفة ما خلصت، واللي جاي أكبر!", "well": "ورجعنا لليلة سودا، في قعر بير مظلم، ورجّال محبوس من شهرين. ما معه إلا فحمة وكرتون، وعين على الحارس. اكتب يا سالم، اكتب!", "salem": "الحين أنت سالم يا نشمي! والغالية هي الوحيدة اللي تعرف درب الديرة. طلّعها من المراح، ولا يلمحك الكشاف!", "market": "سوق الحلال! رغا البل، وصياح الدلالين، والزحمة تضيّع الحليم. بس عينك على الوسم يا ولد، الحق ما يضيع وسط الزحمة!", "station": "آخر محطة قبل النفود، وصاحبها يبتسم لك ابتسامة، الله أعلم وش وراها. اسأل بهدوء، وخل عيونك تشتغل قبل لسانك.", "highway": "الليل على الخط، وأنوار ذياب لاصقة في ظهرك! غيّر مسارك، وانتبه للبل السايبة. لا تخليه يلحقك يا نشمي!", "jail": "وقفوه، وقفلوا عليه الباب. بس الرجّال ما ينكسر بقفل! حقك تتصل، وحقك محامي. خلك ثابت يا مشعل!", "feed": "وجا دورك يا نورة! الترند يغلي، وفيه شهود صادقين، وفيه حسابات تدوّر بيتكم. احمي أهلك يا بنت الرجال!", "court": "ويوم الحق وصل! القاضي يسمع، والدليل يتكلم، والناس تنتظر. رتّب حجتك يا مشعل، ترى ما ضاع حق وراه مطالب!", "after": "ودارت الأيام يا جماعة، والحوار كبر، والفزعة رجعت لأهلها. حيّ الله المجالس الطيبة، وحيّ الله أهلها!", "fin": "وبعد سنة كاملة، نادت النفود من جديد. بس هالمرة يا جماعة، التايه يعرف الدرب زين!", "end2": "وهذي يا جماعة الخير سالفة مشعل: فزع لناقة طايحة، وفزعت له الدنيا كلها. والطيب ما يضيع، لو طال الزمن. وسلامتكم!", "fail1": "طحت؟ ما عليه! الذيب يطيح ويقوم. قم يا نشمي، وجرّبها مرة ثانية!", "fail2": "لا يضيق صدرك يا ولد، كل جواد له كبوة. يالله، ثانية!", "fail3": "عز الله إنك قريب! بس شوي صبر، وتطلع منها مرفوع الراس!", "fail4": "الصبر مفتاح الفرج! ركّز هالمرة، وأنا أشهد إنك قدها وقدود!", "fail5": "ما يعيب الطيحة يا جماعة، يعيب اللي ما يقوم منها. قم يا نشمي!", "star3": "ولا غلطة وحدة! هذا شغل الذيابة! ثلاث نجوم، وحلاوتها!"};
+  const RAWI_T = {"title": "يا هلا ومسهلا! اسمعوا يا جماعة الخير، هذي سالفة صارت في النفود، ويقولون إنها صدق. رجّال تاه في بحر رمل، والعطش ينهش فيه، وبنته تنتظره عند الباب. والله ما يدري وش مخبّي له الدرب! يالله يا نشمي، شد حيلك، وخلنا نشوف معدنك!", "c1": "يقول الراوي: طلع مشعل يدوّر الفقع، والسيارة غرّزت، والشمس فوق راسه مثل الجمر. ما معه إلا جالون مويه، ونجمة الجدي. امش يا ولد، ولا تلتفت!", "half": "زين يا نشمي! نص الدرب صار ورا ظهرك. بس اسمعها مني: اللي يوقف في هالبر، البر ياكله!", "thirst": "آه يا العطش! الريق نشف، والخطوة ثقلت، والراس يدور. بس تذكّر نورة واقفة عند الباب، وكمّل!", "c2": "وبين الطعوس، شاف شي ما توقعه: ناقة طايحة، ولسانها ناشف، وحبلها مقطوع. ومويته على قده. هنا يا جماعة، يبان معدن الرجّال!", "camelup": "الله أكبر! سقاها من مويته، وقامت تنفض الرمل عنها، وبركت له تقول: اركب! هذي يا جماعة سلوم العرب، والفزعة ما تضيع!", "c3": "ومع المغرب، بانت قرية طين في آخر الدنيا، وفوانيسها تلمع. فرح مشعل، بس الراوي يقول لك: مو كل ضو يدل على خير!", "c4": "دخل المجلس، والدلال على الجمر، وريحة الهيل والبخور، وكل العيون عليه. القهوة كرم يا نشمي، بس الفنجال اللي ما تعرف صبّابه، رده بأدب!", "key": "أخذه من تحت عينه! والله إنك ذيب ما ينلحق! بس هدّ اللعب، الليل لسه طويل.", "c5": "انتصف الليل، والقرية نايمة، إلا حارس فوق البرج بكشافه. امش مثل الظل يا ولد، وخل البيوت بينك وبين الضو. الحين وقتك!", "c6": "وفي عز الليل، بانت نار بعيدة، وبيت شعر بابه مفتوح. هذي يا جماعة ديرة الكرم: الضيف فيها ضيف الله، والدخيل ما ينسلّم، لو جات الدنيا كلها تطلبه!", "flee": "طلقة! اركضي يالغالية، اركضي! القوم وراكم، والليل ستر لكم. لا تلتفتون!", "end1": "ومع الفجر، بانت أنوار الخط، ووصل التايه، ونورة واقفة عند الباب. بس اصبروا علي يا جماعة، السالفة ما خلصت، واللي جاي أكبر!", "well": "ورجعنا لليلة سودا، في قعر بير مظلم، ورجّال محبوس من شهرين. ما معه إلا فحمة وكرتون، وعين على الحارس. اكتب يا سالم، اكتب!", "salem": "الحين أنت سالم يا نشمي! والغالية هي الوحيدة اللي تعرف درب الديرة. طلّعها من المراح، ولا يلمحك الكشاف!", "market": "سوق الحلال! رغا البل، وصياح الدلالين، والزحمة تضيّع الحليم. بس عينك على الوسم يا ولد، الحق ما يضيع وسط الزحمة!", "station": "آخر محطة قبل النفود، وصاحبها يبتسم لك ابتسامة، الله أعلم وش وراها. اسأل بهدوء، وخل عيونك تشتغل قبل لسانك.", "highway": "الليل على الخط، وأنوار ذياب لاصقة في ظهرك! غيّر مسارك، وانتبه للبل السايبة. لا تخليه يلحقك يا نشمي!", "jail": "وقفوه، وقفلوا عليه الباب. بس الرجّال ما ينكسر بقفل! حقك تتصل، وحقك محامي. خلك ثابت يا مشعل!", "feed": "وجا دورك يا نورة! الترند يغلي، وفيه شهود صادقين، وفيه حسابات تدوّر بيتكم. احمي أهلك يا بنت الرجال!", "court": "ويوم الحق وصل! القاضي يسمع، والدليل يتكلم، والناس تنتظر. رتّب حجتك يا مشعل، ترى ما ضاع حق وراه مطالب!", "after": "ودارت الأيام يا جماعة، والحوار كبر، والفزعة رجعت لأهلها. حيّ الله المجالس الطيبة، وحيّ الله أهلها!", "fin": "وبعد سنة كاملة، نادت النفود من جديد. بس هالمرة يا جماعة، التايه يعرف الدرب زين!", "end2": "وهذي يا جماعة الخير سالفة مشعل: فزع لناقة طايحة، وفزعت له الدنيا كلها. والطيب ما يضيع، لو طال الزمن. وسلامتكم!", "fail1": "طحت؟ ما عليه! الذيب يطيح ويقوم. قم يا نشمي، وجرّبها مرة ثانية!", "fail2": "لا يضيق صدرك يا ولد، كل جواد له كبوة. يالله، ثانية!", "fail3": "عز الله إنك قريب! بس شوي صبر، وتطلع منها مرفوع الراس!", "fail4": "الصبر مفتاح الفرج! ركّز هالمرة، وأنا أشهد إنك قدها وقدود!", "fail5": "ما يعيب الطيحة يا جماعة، يعيب اللي ما يقوم منها. قم يا نشمي!", "star3": "ولا غلطة وحدة! هذا شغل الذيابة! ثلاث نجوم، وحلاوتها!"};
   const RAWI = { cur: null, q: [], said: {} };
   function narrate(k, now) {
     if (SND.mode === 2 || !RAWI_T[k]) return;
@@ -1316,7 +1321,7 @@
   }
 
   // ------- الفصول والنجوم -------
-  const ORDER = ["c1", "c2", "c3", "c4", "c5", "well", "salem", "market", "station", "highway", "jail", "feed", "court", "after", "fin"];
+  const ORDER = ["c1", "c2", "c3", "c4", "c5", "c6", "well", "salem", "market", "station", "highway", "jail", "feed", "court", "after", "fin"];
   const CH1 = { c1: ["الفصل الأول", "التايه"], c2: ["الفصل الثاني", "الغالية"], c3: ["الفصل الثالث", "القرية"], c4: ["الفصل الرابع", "العشاء"], c5: ["الفصل الخامس", "الهروب"] };
   let PROG = { stars: {}, reach: {} };
   try { PROG = Object.assign({ stars: {}, reach: {} }, JSON.parse(lsGet("altayeh3d-prog") || "{}")); } catch (e) {}
@@ -1349,7 +1354,7 @@
     const g = document.createElement("div"); g.id = "chgrid"; g.className = "chgrid";
     let total = 0;
     ORDER.forEach((k, i) => {
-      const nm = CH1[k] || CH2[k], st = PROG.stars[k] || 0, open = k === "c1" || (!CH1[k] && (PROG.reach[k] || k === "well" && PROG.reach.c5));
+      const nm = CH1[k] || CH2[k], st = PROG.stars[k] || 0, open = k === "c1" || (!CH1[k] && (PROG.reach[k] || (k === "well" || k === "c6") && PROG.reach.c5));
       total += st;
       const b = document.createElement("button"); b.type = "button"; b.disabled = !open;
       b.innerHTML = "<small></small><span></span><i></i>";
@@ -1364,7 +1369,7 @@
   }
 
   // ------- قاموس البدو: شرح الكلمات البدوية تحت الكلام -------
-  const GLOSS = [{"re": "النفود", "w": "النفود", "l": "Nafud", "nko": "나푸드", "nzh": "内夫德", "nru": "Нефуд", "ar": "صحراء رملية حمراء كبيرة في شمال السعودية، طعوسها عالية وتضيّع اللي ما يعرفها.", "en": "A vast red-sand desert in northern Saudi Arabia, with towering dunes that swallow the unwary.", "es": "Un gran desierto de arena roja en el norte de Arabia Saudí, con dunas enormes.", "it": "Un vasto deserto di sabbia rossa nel nord dell'Arabia Saudita, con dune altissime.", "de": "Eine riesige Rotsandwüste im Norden Saudi-Arabiens mit gewaltigen Dünen.", "ko": "사우디아라비아 북부의 거대한 붉은 모래 사막. 모래언덕이 아주 높다.", "zh": "沙特北部一片广阔的红沙沙漠，沙丘高耸。", "fil": "Isang malawak na disyerto ng pulang buhangin sa hilagang Saudi Arabia, may napakataas na buhanginan.", "ru": "Огромная пустыня с красным песком на севере Саудовской Аравии, с высокими барханами."}, {"re": "الفقع", "w": "الفقع", "l": "Faq'a", "nko": "파크아", "nzh": "沙漠松露", "nru": "факаа", "ar": "الكمأة: نبتة تطلع تحت الرمل بعد أمطار الشتاء، والناس يطلعون للبر يدوّرونها في الربيع.", "en": "Desert truffles that grow under the sand after winter rains; families head out to hunt them in spring.", "es": "Trufas del desierto que crecen bajo la arena tras las lluvias de invierno; las familias salen a buscarlas en primavera.", "it": "Tartufi del deserto che crescono sotto la sabbia dopo le piogge invernali; in primavera le famiglie vanno a cercarli.", "de": "Wüstentrüffel, die nach den Winterregen unter dem Sand wachsen; im Frühling ziehen Familien los, um sie zu suchen.", "ko": "겨울비가 온 뒤 모래 밑에서 자라는 사막 트러플. 봄이면 가족들이 캐러 나간다.", "zh": "冬雨过后长在沙下的沙漠松露，春天人们会全家出去挖。", "fil": "Mga truffle sa disyerto na tumutubo sa ilalim ng buhangin pagkatapos ng ulan sa taglamig; hinahanap ito ng mga pamilya tuwing tagsibol.", "ru": "Пустынные трюфели, растущие под песком после зимних дождей; весной семьи выезжают их искать."}, {"re": "طعس|طعوس", "w": "الطعس", "l": "Ta's", "nko": "타으스", "nzh": "沙丘", "nru": "таъс", "ar": "كثيب رمل عالي. جمعه طعوس.", "en": "A tall sand dune (plural: tu'us).", "es": "Una duna de arena alta.", "it": "Un'alta duna di sabbia.", "de": "Eine hohe Sanddüne.", "ko": "높은 모래언덕.", "zh": "高大的沙丘。", "fil": "Isang mataas na buhanginan (sand dune).", "ru": "Высокий песчаный бархан."}, {"re": "العوسج", "w": "العوسج", "l": "'Awsaj", "nko": "아우사즈", "nzh": "枸杞刺丛", "nru": "аусадж", "ar": "شجيرة صحراوية مليانة شوك.", "en": "A thorny desert shrub.", "es": "Un arbusto espinoso del desierto.", "it": "Un arbusto spinoso del deserto.", "de": "Ein dorniger Wüstenstrauch.", "ko": "가시가 많은 사막 관목.", "zh": "一种多刺的沙漠灌木。", "fil": "Isang matinik na halaman sa disyerto.", "ru": "Колючий пустынный кустарник."}, {"re": "الجدي", "w": "الجدي", "l": "Al-Jadi", "nko": "알자디", "nzh": "北极星", "nru": "аль-Джади", "ar": "النجم القطبي. ثابت في الشمال، والبدو يهتدون فيه بالليل.", "en": "The North Star (Polaris). It stays fixed in the north, so Bedouins navigate by it at night.", "es": "La Estrella Polar. Siempre está al norte, y los beduinos se orientan con ella de noche.", "it": "La Stella Polare. Resta fissa a nord, e i beduini si orientano con lei di notte.", "de": "Der Polarstern. Er steht immer im Norden, deshalb navigieren Beduinen nachts nach ihm.", "ko": "북극성. 늘 북쪽에 있어서 베두인은 밤에 이 별을 보고 길을 찾는다.", "zh": "北极星。它始终在北方，贝都因人夜里靠它辨认方向。", "fil": "Ang North Star (Polaris). Nananatili ito sa hilaga, kaya ginagamit ito ng mga Bedouin sa paglalakbay sa gabi.", "ru": "Полярная звезда. Она всегда на севере, и бедуины ночью ориентируются по ней."}, {"re": "فزع", "w": "الفزعة", "l": "Fazaa", "nko": "파자", "nzh": "法扎", "nru": "фазаа", "ar": "إنك تهب لنجدة المحتاج بدون ما يطلب. من أعز قيم البدو.", "en": "Rushing to help someone in need without being asked. One of the most cherished Bedouin values.", "es": "Acudir a ayudar a quien lo necesita sin que lo pida. Uno de los valores beduinos más queridos.", "it": "Correre in aiuto di chi ha bisogno senza che lo chieda. Uno dei valori beduini più cari.", "de": "Jemandem in Not zu Hilfe eilen, ohne dass er darum bittet. Einer der wichtigsten Beduinenwerte.", "ko": "부탁하지 않아도 곤경에 처한 사람을 도우러 달려가는 것. 베두인이 가장 소중히 여기는 가치.", "zh": "不等对方开口就挺身相助。贝都因人最珍视的品德之一。", "fil": "Ang pagsaklolo sa nangangailangan nang hindi hinihingi. Isa sa pinakamahalagang pagpapahalaga ng mga Bedouin.", "ru": "Прийти на помощь нуждающемуся, не дожидаясь просьбы. Одна из самых почитаемых ценностей бедуинов."}, {"re": "مجلس|المجالس", "w": "المجلس", "l": "Majlis", "nko": "마즐리스", "nzh": "马吉利斯", "nru": "маджлис", "ar": "المكان اللي يجلس فيه الرجال ويستقبلون الضيوف ويقدمون القهوة.", "en": "The sitting room where men gather, receive guests and serve coffee.", "es": "La sala donde los hombres se reúnen, reciben a los invitados y sirven café.", "it": "La sala dove gli uomini si riuniscono, ricevono gli ospiti e servono il caffè.", "de": "Der Raum, in dem Männer zusammensitzen, Gäste empfangen und Kaffee servieren.", "ko": "남자들이 모여 손님을 맞고 커피를 대접하는 응접실.", "zh": "男人们聚坐、接待客人、奉上咖啡的会客厅。", "fil": "Ang silid kung saan nagtitipon ang mga lalaki, tumatanggap ng bisita at naghahain ng kape.", "ru": "Комната, где мужчины собираются, принимают гостей и подают кофе."}, {"re": "الدلة|الدلال(?!ين)|ودلال", "w": "الدلة", "l": "Dallah", "nko": "달라", "nzh": "达拉壶", "nru": "далла", "ar": "إبريق القهوة العربية بمنقاره الطويل.", "en": "The traditional long-spouted Arabic coffee pot.", "es": "La cafetera árabe tradicional de pico largo.", "it": "La tradizionale caffettiera araba dal lungo becco.", "de": "Die traditionelle arabische Kaffeekanne mit langem Schnabel.", "ko": "부리가 긴 전통 아랍 커피 주전자.", "zh": "传统的长嘴阿拉伯咖啡壶。", "fil": "Ang tradisyonal na Arabic na kapehan na may mahabang tuka.", "ru": "Традиционный арабский кофейник с длинным носиком."}, {"re": "فنجال|الفناجيل", "w": "الفنجال", "l": "Finjal", "nko": "핀잘", "nzh": "小咖啡杯", "nru": "финджаль", "ar": "الكوب الصغير بدون يد اللي تنصب فيه القهوة العربية.", "en": "The small handleless cup for Arabic coffee.", "es": "La tacita sin asa para el café árabe.", "it": "La tazzina senza manico per il caffè arabo.", "de": "Die kleine henkellose Tasse für arabischen Kaffee.", "ko": "손잡이 없는 작은 아랍 커피 잔.", "zh": "没有把手的阿拉伯咖啡小杯。", "fil": "Ang maliit na tasang walang hawakan para sa Arabic na kape.", "ru": "Маленькая чашечка без ручки для арабского кофе."}, {"re": "أهز الفنجال|هزّ الفنجال", "w": "هز الفنجال", "l": "Shaking the cup", "nko": "잔 흔들기", "nzh": "摇杯", "nru": "покачать чашкой", "ar": "إذا هزيت الفنجال يمين ويسار، معناها «كفاية، مشكور» بأدب.", "en": "Gently shaking the empty cup means \"enough, thank you\" in polite Saudi custom.", "es": "Agitar suavemente la taza vacía significa «basta, gracias» según la cortesía saudí.", "it": "Scuotere piano la tazzina vuota significa «basta, grazie» secondo l'usanza saudita.", "de": "Die leere Tasse sanft zu schütteln heißt nach saudischer Sitte: „Genug, danke.“", "ko": "빈 잔을 살짝 흔들면 사우디 예절로 \"충분합니다, 감사합니다\"라는 뜻이다.", "zh": "轻轻摇动空杯，在沙特礼仪中表示“够了，谢谢”。", "fil": "Ang marahang pag-iling ng tasa ay nangangahulugang \"tama na, salamat\" ayon sa kaugaliang Saudi.", "ru": "Покачать пустой чашкой по саудовскому обычаю значит вежливо сказать: «Хватит, спасибо»."}, {"re": "شماغ", "w": "الشماغ", "l": "Shemagh", "nko": "쉬마그", "nzh": "红格头巾", "nru": "шемаг", "ar": "غطاء الرأس الأحمر والأبيض المربّع اللي يلبسه الرجال في السعودية.", "en": "The red-and-white checkered headscarf worn by Saudi men.", "es": "El pañuelo de cuadros rojos y blancos que llevan los hombres saudíes.", "it": "Il copricapo a quadri rossi e bianchi portato dagli uomini sauditi.", "de": "Das rot-weiß karierte Kopftuch saudischer Männer.", "ko": "사우디 남성이 쓰는 빨간색과 흰색 체크무늬 머릿수건.", "zh": "沙特男子戴的红白格子头巾。", "fil": "Ang pula at puting checkered na panakip sa ulo ng mga lalaking Saudi.", "ru": "Красно-белый клетчатый платок, который носят саудовские мужчины."}, {"re": "حلال", "w": "الحلال", "l": "Halal (livestock)", "nko": "할랄(가축)", "nzh": "牲口", "nru": "халяль (скот)", "ar": "عند البدو: المواشي اللي يملكها الشخص، من إبل وغنم.", "en": "In Bedouin speech, a family's livestock: camels, sheep and goats.", "es": "En el habla beduina, el ganado de una familia: camellos, ovejas y cabras.", "it": "Nel parlare beduino, il bestiame di una famiglia: cammelli, pecore e capre.", "de": "In der Sprache der Beduinen das Vieh einer Familie: Kamele, Schafe und Ziegen.", "ko": "베두인 말로 한 집안의 가축. 낙타, 양, 염소.", "zh": "贝都因语中指一家的牲口：骆驼、绵羊和山羊。", "fil": "Sa wika ng Bedouin, ang mga hayop ng pamilya: kamelyo, tupa at kambing.", "ru": "На языке бедуинов — скот семьи: верблюды, овцы и козы."}, {"re": "وسم", "w": "الوسم", "l": "Wasm", "nko": "와슴", "nzh": "烙印", "nru": "васм", "ar": "علامة القبيلة أو العائلة تنكوى على الناقة عشان تعرف لمن هي.", "en": "A family or tribal mark branded on a camel to show who owns it.", "es": "La marca de la familia o tribu que se graba a fuego en el camello para mostrar su dueño.", "it": "Il marchio della famiglia o tribù impresso a fuoco sul cammello per indicarne il proprietario.", "de": "Das Familien- oder Stammeszeichen, das einem Kamel eingebrannt wird, um den Besitzer zu zeigen.", "ko": "주인을 표시하려고 낙타에 찍는 가문이나 부족의 낙인.", "zh": "烙在骆驼身上、表明主人的家族或部落标记。", "fil": "Ang tatak ng pamilya o tribo na idinadarang sa kamelyo para ipakita kung kanino ito.", "ru": "Знак семьи или племени, выжигаемый на верблюде, чтобы показать владельца."}, {"re": "المراح", "w": "المراح", "l": "Marah", "nko": "마라흐", "nzh": "畜栏", "nru": "марах", "ar": "المكان اللي ترتاح فيه المواشي بالليل.", "en": "The pen where livestock rest at night.", "es": "El corral donde descansa el ganado de noche.", "it": "Il recinto dove il bestiame riposa la notte.", "de": "Das Gehege, in dem das Vieh nachts ruht.", "ko": "가축이 밤에 쉬는 우리.", "zh": "牲口夜里歇息的圈。", "fil": "Ang kulungan kung saan nagpapahinga ang mga hayop sa gabi.", "ru": "Загон, где скот отдыхает ночью."}, {"re": "حوار", "w": "الحوار", "l": "Hiwar", "nko": "히와르", "nzh": "小骆驼", "nru": "хувар", "ar": "ولد الناقة الصغير.", "en": "A young camel calf.", "es": "La cría del camello.", "it": "Il piccolo del cammello.", "de": "Ein junges Kamelfohlen.", "ko": "새끼 낙타.", "zh": "骆驼幼崽。", "fil": "Isang batang kamelyo.", "ru": "Детёныш верблюда."}, {"re": "الغالية|يالغالية", "w": "الغالية", "l": "Al-Ghalia", "nko": "알갈리아", "nzh": "加利娅", "nru": "аль-Галия", "ar": "معناها «العزيزة الثمينة»، وهو اسم الناقة في القصة.", "en": "Means \"the precious one\". It is the camel's name in the story.", "es": "Significa «la preciosa». Es el nombre de la camella en la historia.", "it": "Significa «la preziosa». È il nome della cammella nella storia.", "de": "Bedeutet „die Kostbare“. So heißt die Kamelstute in der Geschichte.", "ko": "\"소중한 것\"이라는 뜻. 이야기 속 낙타의 이름이다.", "zh": "意思是“珍贵的”，是故事里那头骆驼的名字。", "fil": "Ibig sabihin ay \"ang mahalaga\". Ito ang pangalan ng kamelyo sa kuwento.", "ru": "Значит «драгоценная». Так зовут верблюдицу в истории."}, {"re": "يبه", "w": "يبه", "l": "Yubah", "nko": "유바", "nzh": "爸爸", "nru": "юбах", "ar": "«يا أبي» باللهجة السعودية، كذا ينادي الولد أبوه.", "en": "\"Dad\" in Saudi dialect, how children call their father.", "es": "«Papá» en dialecto saudí.", "it": "«Papà» in dialetto saudita.", "de": "„Papa“ im saudischen Dialekt.", "ko": "사우디 방언으로 \"아빠\".", "zh": "沙特方言里的“爸爸”。", "fil": "\"Papa\" sa diyalektong Saudi.", "ru": "«Папа» на саудовском диалекте."}, {"re": "نشمي", "w": "نشمي", "l": "Nashmi", "nko": "나시미", "nzh": "好汉", "nru": "нашми", "ar": "الرجل الشهم الشجاع اللي يوقف مع الناس.", "en": "A brave, chivalrous man who stands by others.", "es": "Un hombre valiente y caballeroso que apoya a los demás.", "it": "Un uomo coraggioso e cavalleresco che sta accanto agli altri.", "de": "Ein tapferer, ritterlicher Mann, der anderen beisteht.", "ko": "남을 돕는 용감하고 의로운 사내.", "zh": "仗义勇敢、肯帮人的汉子。", "fil": "Isang matapang at marangal na lalaking tumutulong sa iba.", "ru": "Храбрый, благородный человек, который приходит на помощь."}, {"re": "الوجار", "w": "الوجار", "l": "Wjar", "nko": "위자르", "nzh": "火塘", "nru": "виджар", "ar": "موقد الجمر في المجلس اللي تنطبخ عليه القهوة.", "en": "The ember hearth in the majlis where the coffee is made.", "es": "El fogón de brasas del majlis donde se prepara el café.", "it": "Il focolare di brace nel majlis dove si prepara il caffè.", "de": "Die Glutfeuerstelle im Majlis, auf der der Kaffee zubereitet wird.", "ko": "마즐리스에서 커피를 끓이는 숯불 화덕.", "zh": "马吉利斯里煮咖啡的炭火塘。", "fil": "Ang apuyan ng baga sa majlis kung saan niluluto ang kape.", "ru": "Очаг с углями в маджлисе, на котором варят кофе."}, {"re": "الديرة", "w": "الديرة", "l": "Deerah", "nko": "디라", "nzh": "家乡", "nru": "дира", "ar": "البلد أو المنطقة اللي ينتمي لها الشخص.", "en": "One's home town or home region.", "es": "El pueblo o la región natal de uno.", "it": "Il paese o la regione d'origine.", "de": "Die eigene Heimatstadt oder Heimatregion.", "ko": "고향 마을이나 고장.", "zh": "自己的家乡、故土。", "fil": "Ang sariling bayan o rehiyon.", "ru": "Родной город или родные края."}, {"re": "ذيب|الذيابة", "w": "ذيب", "l": "Theeb", "nko": "디브", "nzh": "狼", "nru": "зиб", "ar": "الذئب. ويمدحون فيه الرجل الذكي الشجاع: «ذيب».", "en": "Wolf. Calling a man a \"theeb\" praises him as clever and brave.", "es": "Lobo. Llamar «theeb» a un hombre es elogiarlo como astuto y valiente.", "it": "Lupo. Chiamare un uomo «theeb» significa lodarlo come astuto e coraggioso.", "de": "Wolf. Einen Mann „Theeb“ zu nennen, lobt ihn als klug und mutig.", "ko": "늑대. 남자를 \"디브\"라고 부르면 영리하고 용감하다는 칭찬이다.", "zh": "狼。称一个男人为“狼”，是夸他聪明勇敢。", "fil": "Lobo. Ang pagtawag sa lalaki na \"theeb\" ay papuri sa talino at tapang niya.", "ru": "Волк. Назвать мужчину «зибом» — похвалить его ум и храбрость."}, {"re": "سلوم", "w": "سلوم العرب", "l": "Sloom al-Arab", "nko": "슬룸 알아랍", "nzh": "阿拉伯规矩", "nru": "слум аль-араб", "ar": "عادات العرب وأعرافهم في الكرم والمروءة.", "en": "The customs and code of honor of the Arabs: hospitality, generosity and chivalry.", "es": "Las costumbres y el código de honor árabes: hospitalidad, generosidad y caballerosidad.", "it": "Le usanze e il codice d'onore arabi: ospitalità, generosità e cavalleria.", "de": "Die Bräuche und der Ehrenkodex der Araber: Gastfreundschaft, Großzügigkeit, Ritterlichkeit.", "ko": "아랍의 관습과 명예 규범. 환대, 관대함, 의리.", "zh": "阿拉伯人的风俗与荣誉准则：好客、慷慨、仗义。", "fil": "Ang mga kaugalian at dangal ng mga Arabo: pagkamapagpatuloy, pagkabukas-palad at pagkamaginoo.", "ru": "Обычаи и кодекс чести арабов: гостеприимство, щедрость и благородство."}, {"re": "غرّز|غرز", "w": "غرّزت", "l": "Gharraz", "nko": "가라즈", "nzh": "陷车", "nru": "гарраз", "ar": "إن السيارة تعلق في الرمل وما تقدر تطلع.", "en": "When a car gets bogged down in the sand and can't move.", "es": "Cuando el coche se atasca en la arena y no puede salir.", "it": "Quando l'auto si impantana nella sabbia e non si muove.", "de": "Wenn ein Auto im Sand stecken bleibt und nicht mehr herauskommt.", "ko": "차가 모래에 빠져 움직이지 못하는 것.", "zh": "车子陷进沙里出不来。", "fil": "Kapag naipit ang kotse sa buhangin at hindi makaalis.", "ru": "Когда машина увязает в песке и не может выехать."}];
+  const GLOSS = [{"re": "النفود", "w": "النفود", "l": "Nafud", "nko": "나푸드", "nzh": "内夫德", "nru": "Нефуд", "ar": "صحراء رملية حمراء كبيرة في شمال السعودية، طعوسها عالية وتضيّع اللي ما يعرفها.", "en": "A vast red-sand desert in northern Saudi Arabia, with towering dunes that swallow the unwary.", "es": "Un gran desierto de arena roja en el norte de Arabia Saudí, con dunas enormes.", "it": "Un vasto deserto di sabbia rossa nel nord dell'Arabia Saudita, con dune altissime.", "de": "Eine riesige Rotsandwüste im Norden Saudi-Arabiens mit gewaltigen Dünen.", "ko": "사우디아라비아 북부의 거대한 붉은 모래 사막. 모래언덕이 아주 높다.", "zh": "沙特北部一片广阔的红沙沙漠，沙丘高耸。", "fil": "Isang malawak na disyerto ng pulang buhangin sa hilagang Saudi Arabia, may napakataas na buhanginan.", "ru": "Огромная пустыня с красным песком на севере Саудовской Аравии, с высокими барханами."}, {"re": "الفقع", "w": "الفقع", "l": "Faq'a", "nko": "파크아", "nzh": "沙漠松露", "nru": "факаа", "ar": "الكمأة: نبتة تطلع تحت الرمل بعد أمطار الشتاء، والناس يطلعون للبر يدوّرونها في الربيع.", "en": "Desert truffles that grow under the sand after winter rains; families head out to hunt them in spring.", "es": "Trufas del desierto que crecen bajo la arena tras las lluvias de invierno; las familias salen a buscarlas en primavera.", "it": "Tartufi del deserto che crescono sotto la sabbia dopo le piogge invernali; in primavera le famiglie vanno a cercarli.", "de": "Wüstentrüffel, die nach den Winterregen unter dem Sand wachsen; im Frühling ziehen Familien los, um sie zu suchen.", "ko": "겨울비가 온 뒤 모래 밑에서 자라는 사막 트러플. 봄이면 가족들이 캐러 나간다.", "zh": "冬雨过后长在沙下的沙漠松露，春天人们会全家出去挖。", "fil": "Mga truffle sa disyerto na tumutubo sa ilalim ng buhangin pagkatapos ng ulan sa taglamig; hinahanap ito ng mga pamilya tuwing tagsibol.", "ru": "Пустынные трюфели, растущие под песком после зимних дождей; весной семьи выезжают их искать."}, {"re": "طعس|طعوس", "w": "الطعس", "l": "Ta's", "nko": "타으스", "nzh": "沙丘", "nru": "таъс", "ar": "كثيب رمل عالي. جمعه طعوس.", "en": "A tall sand dune (plural: tu'us).", "es": "Una duna de arena alta.", "it": "Un'alta duna di sabbia.", "de": "Eine hohe Sanddüne.", "ko": "높은 모래언덕.", "zh": "高大的沙丘。", "fil": "Isang mataas na buhanginan (sand dune).", "ru": "Высокий песчаный бархан."}, {"re": "العوسج", "w": "العوسج", "l": "'Awsaj", "nko": "아우사즈", "nzh": "枸杞刺丛", "nru": "аусадж", "ar": "شجيرة صحراوية مليانة شوك.", "en": "A thorny desert shrub.", "es": "Un arbusto espinoso del desierto.", "it": "Un arbusto spinoso del deserto.", "de": "Ein dorniger Wüstenstrauch.", "ko": "가시가 많은 사막 관목.", "zh": "一种多刺的沙漠灌木。", "fil": "Isang matinik na halaman sa disyerto.", "ru": "Колючий пустынный кустарник."}, {"re": "الجدي", "w": "الجدي", "l": "Al-Jadi", "nko": "알자디", "nzh": "北极星", "nru": "аль-Джади", "ar": "النجم القطبي. ثابت في الشمال، والبدو يهتدون فيه بالليل.", "en": "The North Star (Polaris). It stays fixed in the north, so Bedouins navigate by it at night.", "es": "La Estrella Polar. Siempre está al norte, y los beduinos se orientan con ella de noche.", "it": "La Stella Polare. Resta fissa a nord, e i beduini si orientano con lei di notte.", "de": "Der Polarstern. Er steht immer im Norden, deshalb navigieren Beduinen nachts nach ihm.", "ko": "북극성. 늘 북쪽에 있어서 베두인은 밤에 이 별을 보고 길을 찾는다.", "zh": "北极星。它始终在北方，贝都因人夜里靠它辨认方向。", "fil": "Ang North Star (Polaris). Nananatili ito sa hilaga, kaya ginagamit ito ng mga Bedouin sa paglalakbay sa gabi.", "ru": "Полярная звезда. Она всегда на севере, и бедуины ночью ориентируются по ней."}, {"re": "فزع", "w": "الفزعة", "l": "Fazaa", "nko": "파자", "nzh": "法扎", "nru": "фазаа", "ar": "إنك تهب لنجدة المحتاج بدون ما يطلب. من أعز قيم البدو.", "en": "Rushing to help someone in need without being asked. One of the most cherished Bedouin values.", "es": "Acudir a ayudar a quien lo necesita sin que lo pida. Uno de los valores beduinos más queridos.", "it": "Correre in aiuto di chi ha bisogno senza che lo chieda. Uno dei valori beduini più cari.", "de": "Jemandem in Not zu Hilfe eilen, ohne dass er darum bittet. Einer der wichtigsten Beduinenwerte.", "ko": "부탁하지 않아도 곤경에 처한 사람을 도우러 달려가는 것. 베두인이 가장 소중히 여기는 가치.", "zh": "不等对方开口就挺身相助。贝都因人最珍视的品德之一。", "fil": "Ang pagsaklolo sa nangangailangan nang hindi hinihingi. Isa sa pinakamahalagang pagpapahalaga ng mga Bedouin.", "ru": "Прийти на помощь нуждающемуся, не дожидаясь просьбы. Одна из самых почитаемых ценностей бедуинов."}, {"re": "مجلس|المجالس", "w": "المجلس", "l": "Majlis", "nko": "마즐리스", "nzh": "马吉利斯", "nru": "маджлис", "ar": "المكان اللي يجلس فيه الرجال ويستقبلون الضيوف ويقدمون القهوة.", "en": "The sitting room where men gather, receive guests and serve coffee.", "es": "La sala donde los hombres se reúnen, reciben a los invitados y sirven café.", "it": "La sala dove gli uomini si riuniscono, ricevono gli ospiti e servono il caffè.", "de": "Der Raum, in dem Männer zusammensitzen, Gäste empfangen und Kaffee servieren.", "ko": "남자들이 모여 손님을 맞고 커피를 대접하는 응접실.", "zh": "男人们聚坐、接待客人、奉上咖啡的会客厅。", "fil": "Ang silid kung saan nagtitipon ang mga lalaki, tumatanggap ng bisita at naghahain ng kape.", "ru": "Комната, где мужчины собираются, принимают гостей и подают кофе."}, {"re": "الدلة|الدلال(?!ين)|ودلال", "w": "الدلة", "l": "Dallah", "nko": "달라", "nzh": "达拉壶", "nru": "далла", "ar": "إبريق القهوة العربية بمنقاره الطويل.", "en": "The traditional long-spouted Arabic coffee pot.", "es": "La cafetera árabe tradicional de pico largo.", "it": "La tradizionale caffettiera araba dal lungo becco.", "de": "Die traditionelle arabische Kaffeekanne mit langem Schnabel.", "ko": "부리가 긴 전통 아랍 커피 주전자.", "zh": "传统的长嘴阿拉伯咖啡壶。", "fil": "Ang tradisyonal na Arabic na kapehan na may mahabang tuka.", "ru": "Традиционный арабский кофейник с длинным носиком."}, {"re": "فنجال|الفناجيل", "w": "الفنجال", "l": "Finjal", "nko": "핀잘", "nzh": "小咖啡杯", "nru": "финджаль", "ar": "الكوب الصغير بدون يد اللي تنصب فيه القهوة العربية.", "en": "The small handleless cup for Arabic coffee.", "es": "La tacita sin asa para el café árabe.", "it": "La tazzina senza manico per il caffè arabo.", "de": "Die kleine henkellose Tasse für arabischen Kaffee.", "ko": "손잡이 없는 작은 아랍 커피 잔.", "zh": "没有把手的阿拉伯咖啡小杯。", "fil": "Ang maliit na tasang walang hawakan para sa Arabic na kape.", "ru": "Маленькая чашечка без ручки для арабского кофе."}, {"re": "أهز الفنجال|هزّ الفنجال", "w": "هز الفنجال", "l": "Shaking the cup", "nko": "잔 흔들기", "nzh": "摇杯", "nru": "покачать чашкой", "ar": "إذا هزيت الفنجال يمين ويسار، معناها «كفاية، مشكور» بأدب.", "en": "Gently shaking the empty cup means \"enough, thank you\" in polite Saudi custom.", "es": "Agitar suavemente la taza vacía significa «basta, gracias» según la cortesía saudí.", "it": "Scuotere piano la tazzina vuota significa «basta, grazie» secondo l'usanza saudita.", "de": "Die leere Tasse sanft zu schütteln heißt nach saudischer Sitte: „Genug, danke.“", "ko": "빈 잔을 살짝 흔들면 사우디 예절로 \"충분합니다, 감사합니다\"라는 뜻이다.", "zh": "轻轻摇动空杯，在沙特礼仪中表示“够了，谢谢”。", "fil": "Ang marahang pag-iling ng tasa ay nangangahulugang \"tama na, salamat\" ayon sa kaugaliang Saudi.", "ru": "Покачать пустой чашкой по саудовскому обычаю значит вежливо сказать: «Хватит, спасибо»."}, {"re": "شماغ", "w": "الشماغ", "l": "Shemagh", "nko": "쉬마그", "nzh": "红格头巾", "nru": "шемаг", "ar": "غطاء الرأس الأحمر والأبيض المربّع اللي يلبسه الرجال في السعودية.", "en": "The red-and-white checkered headscarf worn by Saudi men.", "es": "El pañuelo de cuadros rojos y blancos que llevan los hombres saudíes.", "it": "Il copricapo a quadri rossi e bianchi portato dagli uomini sauditi.", "de": "Das rot-weiß karierte Kopftuch saudischer Männer.", "ko": "사우디 남성이 쓰는 빨간색과 흰색 체크무늬 머릿수건.", "zh": "沙特男子戴的红白格子头巾。", "fil": "Ang pula at puting checkered na panakip sa ulo ng mga lalaking Saudi.", "ru": "Красно-белый клетчатый платок, который носят саудовские мужчины."}, {"re": "حلال", "w": "الحلال", "l": "Halal (livestock)", "nko": "할랄(가축)", "nzh": "牲口", "nru": "халяль (скот)", "ar": "عند البدو: المواشي اللي يملكها الشخص، من إبل وغنم.", "en": "In Bedouin speech, a family's livestock: camels, sheep and goats.", "es": "En el habla beduina, el ganado de una familia: camellos, ovejas y cabras.", "it": "Nel parlare beduino, il bestiame di una famiglia: cammelli, pecore e capre.", "de": "In der Sprache der Beduinen das Vieh einer Familie: Kamele, Schafe und Ziegen.", "ko": "베두인 말로 한 집안의 가축. 낙타, 양, 염소.", "zh": "贝都因语中指一家的牲口：骆驼、绵羊和山羊。", "fil": "Sa wika ng Bedouin, ang mga hayop ng pamilya: kamelyo, tupa at kambing.", "ru": "На языке бедуинов — скот семьи: верблюды, овцы и козы."}, {"re": "وسم", "w": "الوسم", "l": "Wasm", "nko": "와슴", "nzh": "烙印", "nru": "васм", "ar": "علامة القبيلة أو العائلة تنكوى على الناقة عشان تعرف لمن هي.", "en": "A family or tribal mark branded on a camel to show who owns it.", "es": "La marca de la familia o tribu que se graba a fuego en el camello para mostrar su dueño.", "it": "Il marchio della famiglia o tribù impresso a fuoco sul cammello per indicarne il proprietario.", "de": "Das Familien- oder Stammeszeichen, das einem Kamel eingebrannt wird, um den Besitzer zu zeigen.", "ko": "주인을 표시하려고 낙타에 찍는 가문이나 부족의 낙인.", "zh": "烙在骆驼身上、表明主人的家族或部落标记。", "fil": "Ang tatak ng pamilya o tribo na idinadarang sa kamelyo para ipakita kung kanino ito.", "ru": "Знак семьи или племени, выжигаемый на верблюде, чтобы показать владельца."}, {"re": "المراح", "w": "المراح", "l": "Marah", "nko": "마라흐", "nzh": "畜栏", "nru": "марах", "ar": "المكان اللي ترتاح فيه المواشي بالليل.", "en": "The pen where livestock rest at night.", "es": "El corral donde descansa el ganado de noche.", "it": "Il recinto dove il bestiame riposa la notte.", "de": "Das Gehege, in dem das Vieh nachts ruht.", "ko": "가축이 밤에 쉬는 우리.", "zh": "牲口夜里歇息的圈。", "fil": "Ang kulungan kung saan nagpapahinga ang mga hayop sa gabi.", "ru": "Загон, где скот отдыхает ночью."}, {"re": "حوار", "w": "الحوار", "l": "Hiwar", "nko": "히와르", "nzh": "小骆驼", "nru": "хувар", "ar": "ولد الناقة الصغير.", "en": "A young camel calf.", "es": "La cría del camello.", "it": "Il piccolo del cammello.", "de": "Ein junges Kamelfohlen.", "ko": "새끼 낙타.", "zh": "骆驼幼崽。", "fil": "Isang batang kamelyo.", "ru": "Детёныш верблюда."}, {"re": "الغالية|يالغالية", "w": "الغالية", "l": "Al-Ghalia", "nko": "알갈리아", "nzh": "加利娅", "nru": "аль-Галия", "ar": "معناها «العزيزة الثمينة»، وهو اسم الناقة في القصة.", "en": "Means \"the precious one\". It is the camel's name in the story.", "es": "Significa «la preciosa». Es el nombre de la camella en la historia.", "it": "Significa «la preziosa». È il nome della cammella nella storia.", "de": "Bedeutet „die Kostbare“. So heißt die Kamelstute in der Geschichte.", "ko": "\"소중한 것\"이라는 뜻. 이야기 속 낙타의 이름이다.", "zh": "意思是“珍贵的”，是故事里那头骆驼的名字。", "fil": "Ibig sabihin ay \"ang mahalaga\". Ito ang pangalan ng kamelyo sa kuwento.", "ru": "Значит «драгоценная». Так зовут верблюдицу в истории."}, {"re": "يبه", "w": "يبه", "l": "Yubah", "nko": "유바", "nzh": "爸爸", "nru": "юбах", "ar": "«يا أبي» باللهجة السعودية، كذا ينادي الولد أبوه.", "en": "\"Dad\" in Saudi dialect, how children call their father.", "es": "«Papá» en dialecto saudí.", "it": "«Papà» in dialetto saudita.", "de": "„Papa“ im saudischen Dialekt.", "ko": "사우디 방언으로 \"아빠\".", "zh": "沙特方言里的“爸爸”。", "fil": "\"Papa\" sa diyalektong Saudi.", "ru": "«Папа» на саудовском диалекте."}, {"re": "نشمي", "w": "نشمي", "l": "Nashmi", "nko": "나시미", "nzh": "好汉", "nru": "нашми", "ar": "الرجل الشهم الشجاع اللي يوقف مع الناس.", "en": "A brave, chivalrous man who stands by others.", "es": "Un hombre valiente y caballeroso que apoya a los demás.", "it": "Un uomo coraggioso e cavalleresco che sta accanto agli altri.", "de": "Ein tapferer, ritterlicher Mann, der anderen beisteht.", "ko": "남을 돕는 용감하고 의로운 사내.", "zh": "仗义勇敢、肯帮人的汉子。", "fil": "Isang matapang at marangal na lalaking tumutulong sa iba.", "ru": "Храбрый, благородный человек, который приходит на помощь."}, {"re": "الوجار", "w": "الوجار", "l": "Wjar", "nko": "위자르", "nzh": "火塘", "nru": "виджар", "ar": "موقد الجمر في المجلس اللي تنطبخ عليه القهوة.", "en": "The ember hearth in the majlis where the coffee is made.", "es": "El fogón de brasas del majlis donde se prepara el café.", "it": "Il focolare di brace nel majlis dove si prepara il caffè.", "de": "Die Glutfeuerstelle im Majlis, auf der der Kaffee zubereitet wird.", "ko": "마즐리스에서 커피를 끓이는 숯불 화덕.", "zh": "马吉利斯里煮咖啡的炭火塘。", "fil": "Ang apuyan ng baga sa majlis kung saan niluluto ang kape.", "ru": "Очаг с углями в маджлисе, на котором варят кофе."}, {"re": "الديرة", "w": "الديرة", "l": "Deerah", "nko": "디라", "nzh": "家乡", "nru": "дира", "ar": "البلد أو المنطقة اللي ينتمي لها الشخص.", "en": "One's home town or home region.", "es": "El pueblo o la región natal de uno.", "it": "Il paese o la regione d'origine.", "de": "Die eigene Heimatstadt oder Heimatregion.", "ko": "고향 마을이나 고장.", "zh": "自己的家乡、故土。", "fil": "Ang sariling bayan o rehiyon.", "ru": "Родной город или родные края."}, {"re": "ذيب|الذيابة", "w": "ذيب", "l": "Theeb", "nko": "디브", "nzh": "狼", "nru": "зиб", "ar": "الذئب. ويمدحون فيه الرجل الذكي الشجاع: «ذيب».", "en": "Wolf. Calling a man a \"theeb\" praises him as clever and brave.", "es": "Lobo. Llamar «theeb» a un hombre es elogiarlo como astuto y valiente.", "it": "Lupo. Chiamare un uomo «theeb» significa lodarlo come astuto e coraggioso.", "de": "Wolf. Einen Mann „Theeb“ zu nennen, lobt ihn als klug und mutig.", "ko": "늑대. 남자를 \"디브\"라고 부르면 영리하고 용감하다는 칭찬이다.", "zh": "狼。称一个男人为“狼”，是夸他聪明勇敢。", "fil": "Lobo. Ang pagtawag sa lalaki na \"theeb\" ay papuri sa talino at tapang niya.", "ru": "Волк. Назвать мужчину «зибом» — похвалить его ум и храбрость."}, {"re": "سلوم", "w": "سلوم العرب", "l": "Sloom al-Arab", "nko": "슬룸 알아랍", "nzh": "阿拉伯规矩", "nru": "слум аль-араб", "ar": "عادات العرب وأعرافهم في الكرم والمروءة.", "en": "The customs and code of honor of the Arabs: hospitality, generosity and chivalry.", "es": "Las costumbres y el código de honor árabes: hospitalidad, generosidad y caballerosidad.", "it": "Le usanze e il codice d'onore arabi: ospitalità, generosità e cavalleria.", "de": "Die Bräuche und der Ehrenkodex der Araber: Gastfreundschaft, Großzügigkeit, Ritterlichkeit.", "ko": "아랍의 관습과 명예 규범. 환대, 관대함, 의리.", "zh": "阿拉伯人的风俗与荣誉准则：好客、慷慨、仗义。", "fil": "Ang mga kaugalian at dangal ng mga Arabo: pagkamapagpatuloy, pagkabukas-palad at pagkamaginoo.", "ru": "Обычаи и кодекс чести арабов: гостеприимство, щедрость и благородство."}, {"re": "غرّز|غرز", "w": "غرّزت", "l": "Gharraz", "nko": "가라즈", "nzh": "陷车", "nru": "гарраз", "ar": "إن السيارة تعلق في الرمل وما تقدر تطلع.", "en": "When a car gets bogged down in the sand and can't move.", "es": "Cuando el coche se atasca en la arena y no puede salir.", "it": "Quando l'auto si impantana nella sabbia e non si muove.", "de": "Wenn ein Auto im Sand stecken bleibt und nicht mehr herauskommt.", "ko": "차가 모래에 빠져 움직이지 못하는 것.", "zh": "车子陷进沙里出不来。", "fil": "Kapag naipit ang kotse sa buhangin at hindi makaalis.", "ru": "Когда машина увязает в песке и не может выехать."}, {"re": "بيت شعر|بيت الشعر", "w": "بيت الشعر", "l": "Bayt al-sha'r", "nko": "털 천막", "nzh": "黑毛帐篷", "nru": "шатёр из шерсти", "ar": "خيمة البدو السودا، منسوجة من شعر الماعز. تصد المطر والريح، وبابها مفتوح للضيف.", "en": "The Bedouin black tent, woven from goat hair. It keeps out rain and wind, and its door is always open to guests.", "es": "La tienda negra beduina, tejida con pelo de cabra. Protege de la lluvia y el viento, y su puerta siempre está abierta al huésped.", "it": "La tenda nera beduina, tessuta con pelo di capra. Ripara da pioggia e vento, e la sua porta è sempre aperta all'ospite.", "de": "Das schwarze Beduinenzelt aus Ziegenhaar. Es schützt vor Regen und Wind, und seine Tür steht Gästen immer offen.", "ko": "염소털로 짠 베두인의 검은 천막. 비와 바람을 막아 주고, 손님에게는 언제나 열려 있다.", "zh": "贝都因人用山羊毛织成的黑帐篷，能挡风遮雨，门永远为客人敞开。", "fil": "Ang itim na tolda ng Bedouin na hinabi mula sa balahibo ng kambing. Panangga sa ulan at hangin, at laging bukas sa bisita.", "ru": "Чёрный шатёр бедуинов, сотканный из козьей шерсти. Защищает от дождя и ветра, и его вход всегда открыт для гостя."}, {"re": "الهيف", "w": "الهيف", "l": "Al-Hayf", "nko": "하이프", "nzh": "试毒杯", "nru": "аль-хайф", "ar": "أول فنجال من الدلة، يشربه المعزّب نفسه قدام الضيف عشان يطمّنه إن القهوة سليمة.", "en": "The first cup from the pot, drunk by the host himself in front of the guest to show the coffee is safe.", "es": "La primera taza de la cafetera, que bebe el propio anfitrión ante el huésped para demostrar que el café es seguro.", "it": "La prima tazzina della caffettiera, bevuta dal padrone di casa davanti all'ospite per mostrare che il caffè è sicuro.", "de": "Die erste Tasse aus der Kanne trinkt der Gastgeber selbst vor dem Gast, um zu zeigen, dass der Kaffee unbedenklich ist.", "ko": "주전자에서 따른 첫 잔. 주인이 손님 앞에서 직접 마셔 커피가 안전하다는 걸 보여 준다.", "zh": "壶里倒出的第一杯，由主人当着客人的面亲自喝下，以示咖啡无毒、可以放心。", "fil": "Ang unang tasa mula sa dallah, iniinom mismo ng host sa harap ng bisita para ipakitang ligtas ang kape.", "ru": "Первая чашка из кофейника: хозяин сам выпивает её при госте, чтобы показать, что кофе безопасен."}, {"re": "المعزّب|المعزب", "w": "المعزّب", "l": "Al-Mu'azzib", "nko": "무아집", "nzh": "东道主", "nru": "муаззиб", "ar": "صاحب البيت اللي يستقبل الضيف ويكرمه.", "en": "The host: the man of the house who receives and honors the guest.", "es": "El anfitrión: el dueño de la casa que recibe y honra al huésped.", "it": "Il padrone di casa che accoglie e onora l'ospite.", "de": "Der Gastgeber, der Hausherr, der den Gast empfängt und ehrt.", "ko": "손님을 맞아 대접하는 집주인.", "zh": "接待并款待客人的一家之主。", "fil": "Ang may-ari ng bahay na tumatanggap at nagpaparangal sa bisita.", "ru": "Хозяин дома, который принимает и чествует гостя."}, {"re": "دخيل", "w": "الدخيل", "l": "Al-Dakheel", "nko": "다킬", "nzh": "投靠者", "nru": "дахиль", "ar": "اللي يلجأ لبيت أحد ويطلب حمايته. والعرف عند البدو إن الدخيل ما ينسلّم، بس الحق يرجع للقضاء.", "en": "Someone who takes refuge in another's home and asks for protection. Bedouin custom says such a man is never handed over, though any real claim goes to the courts.", "es": "Quien se refugia en la casa de otro y pide protección. La costumbre beduina dice que nunca se le entrega, aunque cualquier reclamación justa va a los tribunales.", "it": "Chi si rifugia nella casa di un altro e chiede protezione. Per l'usanza beduina non viene mai consegnato, ma ogni pretesa giusta va ai tribunali.", "de": "Wer im Haus eines anderen Zuflucht und Schutz sucht. Nach Beduinensitte wird er nie ausgeliefert; berechtigte Ansprüche gehören vor Gericht.", "ko": "남의 집에 몸을 의탁해 보호를 청하는 사람. 베두인 관습상 절대 넘겨주지 않지만, 정당한 시비는 법정에서 가린다.", "zh": "投奔别人家、请求庇护的人。按贝都因习俗，绝不把他交出去，但真有纠纷就交给法庭。", "fil": "Ang taong nanganganlong sa bahay ng iba at humihingi ng proteksiyon. Sa kaugaliang Bedouin, hindi siya isinusuko, pero ang tunay na reklamo ay dinadala sa korte.", "ru": "Тот, кто ищет убежища и защиты в чужом доме. По обычаю бедуинов его никогда не выдают, а настоящие претензии решает суд."}, {"re": "اقلط", "w": "اقلط", "l": "Iglut", "nko": "이글루트", "nzh": "请进", "nru": "иглут", "ar": "«ادخل واجلس» بلهجة نجد والبادية، يقولها المعزّب ترحيب بالضيف.", "en": "\"Come in and sit down\" in Najdi and Bedouin dialect, a host's welcome to a guest.", "es": "«Pasa y siéntate» en dialecto najdí y beduino; así da la bienvenida el anfitrión.", "it": "«Entra e siediti» in dialetto najdi e beduino; il benvenuto del padrone di casa.", "de": "„Komm herein und setz dich“ im Nadschd- und Beduinendialekt, der Willkommensgruß des Gastgebers.", "ko": "나즈드·베두인 방언으로 \"들어와 앉으세요\". 주인이 손님을 맞는 말.", "zh": "内志和贝都因方言里的“请进、请坐”，是主人对客人的招呼。", "fil": "\"Pasok at maupo\" sa diyalektong Najdi at Bedouin, pagbati ng host sa bisita.", "ru": "«Заходи и садись» на наджском и бедуинском диалекте — так хозяин приветствует гостя."}, {"re": "خبز ملّة|خبز الملّة|خبز ملة", "w": "خبز الملّة", "l": "Mallah bread", "nko": "말라 빵", "nzh": "沙烤饼", "nru": "хлеб малла", "ar": "خبز البدو، ينطبخ مدفون تحت الجمر والرمل الحار.", "en": "Bedouin bread baked buried under embers and hot sand.", "es": "Pan beduino que se cuece enterrado bajo las brasas y la arena caliente.", "it": "Pane beduino cotto sepolto sotto la brace e la sabbia calda.", "de": "Beduinenbrot, das unter Glut und heißem Sand gebacken wird.", "ko": "숯불과 뜨거운 모래 밑에 묻어서 굽는 베두인 빵.", "zh": "埋在炭火和热沙下烤成的贝都因面饼。", "fil": "Tinapay ng Bedouin na niluluto nang nakabaon sa baga at mainit na buhangin.", "ru": "Хлеб бедуинов, который пекут, закапывая под угли и горячий песок."}, {"re": "وانيت|الوانيت", "w": "الوانيت", "l": "Wanet", "nko": "와닛", "nzh": "皮卡", "nru": "ванет", "ar": "السيارة الصغيرة اللي وراها حوض (بيك أب). البدو يحملون فيها حتى الإبل.", "en": "A pickup truck (from \"one ton\"). Bedouins even carry camels in the back.", "es": "Una camioneta pick-up. Los beduinos llegan a llevar camellos en la caja.", "it": "Un pick-up. I beduini ci trasportano perfino i cammelli.", "de": "Ein Pick-up. Beduinen transportieren darauf sogar Kamele.", "ko": "픽업트럭. 베두인은 짐칸에 낙타까지 싣는다.", "zh": "皮卡车。贝都因人连骆驼都用它来拉。", "fil": "Isang pickup truck. Pati kamelyo ay isinasakay rito ng mga Bedouin.", "ru": "Пикап. Бедуины возят в кузове даже верблюдов."}];
   GLOSS.forEach(g => { g.rx = new RegExp(g.re); });
   const glossSeen = {};
   const glossName = g => LANG === "ar" ? g.w : (g["n" + LANG] || g.l) + " (" + g.w + ")";
@@ -1406,7 +1411,7 @@
     const [who, text, fx] = d.lines[d.i];
     if (fx) fx();
     $("who").textContent = who; $("txt").textContent = ""; d.full = tr(text); glossFill($("gloss"), text, 2); d.shown = 0; voice(who, text);
-    $("dlg").classList.toggle("tip", who === "تلميح"); $("next").hidden = true; $("choices").hidden = true; $("dlg").hidden = false;
+    $("dlg").classList.toggle("tip", who === "تلميح"); $("next").hidden = true; $("choices").hidden = true; $("dlg").hidden = false; $("talk").scrollTop = 0;
   }
   function lineDone() {
     const d = dialog;
@@ -1418,7 +1423,7 @@
         b.addEventListener("click", e => { e.stopPropagation(); box.hidden = true; $("dlg").hidden = true; dialog = null; fn(); });
         box.appendChild(b);
       });
-      box.hidden = false;
+      box.hidden = false; $("talk").scrollTop = $("talk").scrollHeight;
     } else $("next").hidden = false;
   }
   function tapDialog() {
@@ -1532,6 +1537,10 @@
   });
   $("jumpb").addEventListener("pointerdown", e => { e.preventDefault(); e.stopPropagation(); jump(); });
   let dragId = null, dragX = 0;
+  $("talk").addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;
+    if ($("ov").hidden && dialog) { e.preventDefault(); tapDialog(); }
+  });
   stage.addEventListener("pointerdown", e => {
     if (e.target.closest("button") || e.target.closest("#joy")) return;
     e.preventDefault();
@@ -1566,6 +1575,7 @@
     camera.aspect = r.width / r.height; camera.fov = r.width < r.height ? 68 : 55; camera.updateProjectionMatrix();
   }
   addEventListener("resize", resize); resize();
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
 
   const camPos = V(3, 4, 10), look = V(0, 0, 0);
   let last = 0, smokeT = 0;
@@ -1770,7 +1780,7 @@
       if (lead < 2.4) {
         state = "fail";
         fail("لحقوك قبل لا تبعد عن القرية. جرّب مرة ثانية، وابعد عن البوابة على طول ولا تلف.", () => { $("ov").hidden = true; retryFlee(); }, "مسكوك!", "الفصل الخامس: الهروب");
-      } else if (Math.hypot(px - fleeFrom.x, pz - fleeFrom.z) > 120) finishPart1();
+      } else if (Math.hypot(px - fleeFrom.x, pz - fleeFrom.z) > 120) toCamp();
     } else if (state === "village") {
       spd = 0;
     }
@@ -2108,11 +2118,11 @@
   }
   function finishPart1() {
     state = "fin1"; playUI(false); fadeTo(true);
-    if (curCh === "c5") finishCh("c5"); curCh = "end1"; narrate("end1", true);
+    if (curCh === "c5" || curCh === "c6") finishCh(curCh); curCh = "end1"; narrate("end1", true);
     pursuers.forEach(p => drop(p.o)); pursuers = [];
     const n = Object.keys(clues).length, kind = n >= 4 ? "true" : ate ? "robbed" : "normal";
     const base = [
-      ["مشعل", "(ركضنا الليل كله… ومع الفجر، أنوار سيارات! الخط السريع!)"],
+      ["مشعل", "(ومع الفجر، وصلنا الخط بوانيت مطلق… وأول ما لقط الجوال الشبكة، اتصلت.)"],
       ["مشعل", "ألو، ٩٩٩؟ الشرطة؟ فيه عصابة في قرية مهجورة شمال النفود… وعندهم واحد محبوس اسمه سالم!"],
       ["مشعل", "(وصلت البيت العصر… الحفل خلص. بس نورة واقفة عند الباب بثوب التخرج.)"],
       ["نورة", "يبه!… قلت لهم أبوي بيجي. قلت لهم."]
@@ -2135,6 +2145,160 @@
       E.s + " الأدلة: " + AR(n) + " من ٤ (بطاقة سالم، والقارورة، وأغراض التايهين، والمفتاح).", "كمّل: الجزء الثاني", () => goChapter(startWell), "العبها من البداية", () => { fadeTo(false); start(); }));
   }
 
+  // ------- الفصل السادس: الدخيل (بيت شعر في النفود، وكرم العرب مع الغريب) -------
+  function makeCamp() {
+    const g = new THREE.Group(), obs = [], rects = [];
+    const ground = (x, z) => smooth(26, 60, Math.hypot(x, z - 4)) * (duneY(x - 90, z + 40) * .9 + 1.2) + Math.sin(x * .27) * Math.cos(z * .23) * .05;
+    g.add(sandGround(ground, 240, 240, 0, 0, 110, 110));
+    const tent = makeTent(); tent.position.set(0, 0, -6); g.add(tent); tentRects(0, -6).forEach(r => rects.push(r));
+    const fire = makeFire(); fire.g.position.set(0, 0, -1.8); g.add(fire.g); obs.push({ x: 0, z: -1.8, r: .7, h: 1, kind: "rock" });
+    const herd = [[10, -8, .4], [12.4, -5.2, 1.2], [9.2, -3, -.3], [13.6, -9.4, 2.2]].map(([x, z, r], i) => {
+      const c = makeCamel({ hide: ["#c9a46e", "#8a6a48", "#d9bf94", "#6d5440"][i] }); c.position.set(x, ground(x, z), z); c.rotation.y = r; c.userData.setPose(0, 1); g.add(c);
+      obs.push({ x, z, r: 1.3, h: 2, kind: "car" }); return c;
+    });
+    const truck = makeCar({ drive: true, color: "#cdb995" }); truck.position.set(-9, ground(-9, 2), 2); truck.rotation.y = 1.2; g.add(truck); obs.push({ x: -9, z: 2, r: 2.3, h: 2, kind: "car" });
+    return { g, ground, obs, rects, bound: { x1: -45, x2: 45, z1: -40, z2: 45 }, fire, herd };
+  }
+  const HOST = { thobe: "#ebe6dc", shemagh: "red", beard: "#d9d3c9", real: "v_old" }, HOST_SON = { thobe: "#f5f2eb", shemagh: "red", beard: "#2a211b", real: "v_young" };
+  // من النفود للبيت: يطلع من القرية، ويشوف نار بعيدة
+  function toCamp() { state = "fin1"; playUI(false); goChapter(() => startCamp()); }
+  function startCamp() {
+    const fromMenu = state !== "fin1";
+    begin("c6");
+    if (fromMenu) { ate = !!path.ate; fazaa = path.fazaa || null; peek = !!path.peek; clues = {}; for (let i = 0; i < (path.clues || 0); i++) clues["c" + i] = 1; if (path.note) clues.note = 1; }
+    const C = makeCamp(); useSet(C); setTime("night");
+    px = 5; pz = 30; yaw = .086; camYaw = .086; setHero({ shemagh: "dark" });
+    const galia = put(makeCamel({}), 7.2, 31.2, .4); galia.userData.setPose(0, 1);
+    const host = put(man2(HOST), 1.6, .6, Math.PI);
+    const son = put(man2(Object.assign({ sit: true }, HOST_SON)), -1.7, -1.1, .9);
+    P2.amb = () => { animFire(C.fire); };
+    banner(...CH2.c6);
+    shot(V(9, 4, 38), V(1, 1, -1), true);
+    say([
+      ["مشعل", "(بعدنا عن القرية… والغالية تعبت، وأنا أتعب منها. بس هناك… نار!)", () => shot(V(5.5, 2.4, 34), V(0, 1, -2))],
+      ["مشعل", "(بيت شعر وحلال باركة. بس آخر مجلس دخلته كان فخ… يارب سترك.)"],
+      ["تلميح", "نوّخت الغالية. امشِ للنار."]
+    ], () => {
+      P2.walk = true; cine = null; ui2({ joy: true, right: "للنار" });
+      const mk = markerAt(2.6, 2.2);
+      P2.tick = dt => {
+        const r = steer(dt, 5, .3); heroSpd = r.spd; mk.material.opacity = .6 + Math.sin(t * 5) * .25;
+        faceTo(host, px, pz);
+        const d = Math.hypot(px - 2.6, pz - 2.2); $("left").textContent = AR(Math.round(d)) + " م";
+        if (d < 1.2) { P2.tick = null; P2.walk = false; drop(mk); campWelcome(C, host, son, galia); }
+      };
+    });
+  }
+  function campWelcome(C, host, son, galia) {
+    ui2({}); faceTo(host, px, pz); faceHeroTo(host.position.x, host.position.z);
+    const H = () => faceShot(host, 2.2, .6), Me = () => faceShot(man, 2.2, -.6);
+    say([
+      ["أبو مطلق", "حيّ الله الضيف! حيّاك وسهلًا… اقلط يا ولدي، البيت بيتك.", H],
+      ["مشعل", "الله يحييك… أنا تايه، ومعي ناقة تعبانة.", Me],
+      ["أبو مطلق", "لا تقول شي. القهوة أول، والعلوم بعدين. مطلق! صب للضيف.", H]
+    ], () => fadeTo(true, () => {
+      // الجلسة: الضيف يمين النار، والمعزّب قباله
+      drop(host); drop(son);
+      px = 1.7; pz = -.9; setHero({ shemagh: "dark", sit: true }); P2.still = true; faceHeroTo(0, -1.8);
+      const h2 = put(man2(Object.assign({ sit: true }, HOST)), -1.6, -1.1, 1.2);
+      const s2 = put(man2(HOST_SON), .9, .4, -2.6);
+      galia.position.set(7.4, groundY(7.4, -1.5), -1.5); galia.rotation.y = -1.1;
+      shot(V(0, 2.1, 3.8), V(0, .9, -1.6), true); fadeTo(false);
+      campCoffee(C, h2, s2, galia);
+    }));
+  }
+  function campCoffee(C, host, son, galia) {
+    const H = () => faceShot(host, 2.1, .5), S = () => faceShot(son, 2, .5), Me = () => faceShot(man, 2.1, -.5), W = () => shot(V(0, 2.1, 3.8), V(0, .9, -1.6));
+    const askCup = () => say([
+        ["مطلق", "(ثالث فنجال… ووقف بالدلة قدامك ينتظر.)", S],
+        ["تلميح", "إذا تبي تكتفي، هزّ الفنجال يمين ويسار. وإذا مديته بدون هز، يصب لك زيادة."]
+      ], null, [
+        ["هزّ الفنجال", () => { setPath("cups", 3); say([["مشعل", "(هزيت الفنجال…)", Me], ["مطلق", "دامت عزّك.", S]], campTalk.bind(null, C, host, son, galia)); }],
+        ["مد الفنجال مرة ثانية", () => { setPath("cups", 4); say([["مطلق", "أبشر! …عز الله إن الدرب كان طويل عليك.", S], ["أبو مطلق", "صب له يا ولدي، صب. الضيف ما يُرد.", H]], campTalk.bind(null, C, host, son, galia)); }]
+      ]);
+    say([
+      ["مطلق", "(صب أول فنجال… ومده لأبوه، مو لك.)", S],
+      ["أبو مطلق", "(شربه قدامك على مهله.) هذا الهيف يا ولدي: أول فنجال يشربه المعزّب قدام ضيفه، عشان يطمّن إن القهوة سليمة.", H],
+      ["مشعل", "(سلوم ما سمعت فيها من زمان… وكأنه عرف وش في خاطري.)", Me],
+      ["مطلق", "تفضّل يا الضيف.", S],
+      ["مشعل", "(أول فنجال… وثاني… وطعم الهيل رجّع لي روحي.)", W]
+    ], askCup);
+  }
+  function campTalk(C, host, son, galia) {
+    const H = () => faceShot(host, 2.1, .5), S = () => faceShot(son, 2, .5), Me = () => faceShot(man, 2.1, -.5), W = () => shot(V(0, 2.1, 3.8), V(0, .9, -1.6));
+    say([
+      ["أبو مطلق", "قرّب يا ولدي. خبز ملّة وسمن وتمر، وحليب نوق… والذبيحة بكرة إن شاء الله.", H],
+      ["مشعل", "الله يكثر خيرك يا أبو مطلق. ما سألتني من أنا ولا وش جابني؟", Me],
+      ["أبو مطلق", "الضيف ما ينسأل عن حاجته لين ياكل ويرتاح. هذي عادتنا، وعادة أبوي قبلي.", H],
+      ["مطلق", "يبه… فيه أنوار جاية من صوب الشمال. وانيت مسرع.", () => shot(V(-2, 2.6, 6), V(-14, 1, 22))]
+    ], () => campRaid(C, host, son, galia));
+  }
+  function campRaid(C, host, son, galia) {
+    const car2 = makeCar({ drive: true, color: "#e9e6df" });
+    const hl = new THREE.PointLight("#fff1cc", 2.2, 20, 2); hl.position.set(0, 1, 0); car2.add(hl);
+    put(car2, -34, 44, 2.5);
+    const from = V(-34, 0, 44), to = V(-7, 0, 9); let k = 0;
+    P2.amb = () => {
+      animFire(C.fire);
+      if (k < 1) { k = Math.min(1, k + 1 / 240); const e = smooth(0, 1, k); const x = from.x + (to.x - from.x) * e, z = from.z + (to.z - from.z) * e; car2.position.set(x, groundY(x, z), z); }
+    };
+    const H = () => faceShot(host, 2.1, .5), Me = () => faceShot(man, 2.1, -.5);
+    say([
+      ["مشعل", "(هذا ذياب، ولد كبير القرية… لحقوني لين هنا!)", Me],
+      ["تلميح", "وش بتسوي؟"]
+    ], null, [
+      ["تقول لأبو مطلق الصدق قبل يوصلون", () => { setPath("camp", "told"); say([
+        ["مشعل", "يا أبو مطلق، اسمعني: هذولي عصابة. يسقون التايهين قهوة فيها منوّم، ويسرقونهم، وعندهم رجّال محبوس اسمه سالم. والناقة ناقته.", Me],
+        ["أبو مطلق", "…كفاية. صدقك باين في عيونك. اجلس مكانك.", H]
+      ], () => campStand(C, host, son, car2)); }],
+      ["تقوم تبي تشرد من ورا البيت", () => { setPath("camp", "ran"); say([
+        ["أبو مطلق", "(مسك يدك) اجلس يا ولدي. اللي في بيتي ما يطلع منه خايف.", H],
+        ["مشعل", "يا أبو مطلق، هذولي عصابة… وعندهم رجّال محبوس اسمه سالم، والناقة ناقته.", Me],
+        ["أبو مطلق", "أجل اجلس. وخلهم علي.", H]
+      ], () => campStand(C, host, son, car2)); }]
+    ]);
+  }
+  function campStand(C, host, son, car2) {
+    // يقوم المعزّب ويوقف بين ضيفه وبينهم
+    drop(host); const h3 = put(man2(HOST), -.4, 1.3, Math.PI * .8);
+    son.position.set(.9, groundY(.9, 1.6), 1.6); faceTo(son, -5, 6);
+    const dh = put(man2(LOOK.dhiyab), -5.6, 8.4), v1 = put(man2({ thobe: "#ece7dd", shemagh: "white", beard: "#2a211b", real: "villager" }), -7.2, 8.8);
+    walkN(dh, [[-2.2, 4.4]], 1.6, 0, null, [-.4, 1.3]); walkN(v1, [[-3.8, 5.2]], 1.5, .3, null, [-.4, 1.3]);
+    const D = () => faceShot(dh, 2.2, .5), H = () => faceShot(h3, 2.1, -.5), S = () => faceShot(son, 2, .5), Me = () => faceShot(man, 2.1, -.5);
+    shot(V(4, 2.6, 6.5), V(-2, 1.1, 2.5));
+    setTimeout(() => say([
+      ["ذياب", "السلام عليكم. يا شيخ، اللي عندك حرامي! سرق ناقة أبوي وشرد بها.", () => { faceTo(dh, -.4, 1.3); D(); }],
+      ["أبو مطلق", "وعليكم السلام. الرجّال دخل بيتي وتقهوى عندي، وصار دخيلي. والدخيل ما ينسلّم.", H],
+      ["ذياب", "تحمي حرامي يا شيخ؟", D],
+      ["أبو مطلق", "ما أحمي أحد من الحق. إن كان لك عليه حق، فالشرطة والقاضي بيننا وبينك، وبكرة أوديه لهم بنفسي.", H],
+      ["أبو مطلق", "أما بالليل، وبالسلاح، وعند بيتي؟ لا والله ما يصير.", H],
+      ["مطلق", "(وقف جنب أبوه… ولا قال كلمة.)", S],
+      ["ذياب", "…بنتلاقى يا مشعل.", D]
+    ], () => {
+      walkN(dh, [[-6.4, 8.6]], 1.8, 0, () => drop(dh)); walkN(v1, [[-7.6, 9.4]], 1.8, 0, () => drop(v1));
+      setTimeout(() => {
+        const from = car2.position.clone(); let k = 0;
+        P2.amb = () => { animFire(C.fire); k = Math.min(1, k + 1 / 200); const x = from.x - 30 * k, z = from.z + 34 * k; car2.position.set(x, groundY(x, z), z); };
+        campDawn(C, h3, son);
+      }, 1400);
+    }), 1600);
+  }
+  function campDawn(C, host, son) {
+    const H = () => faceShot(host, 2.1, -.5), Me = () => faceShot(man, 2.1, -.5);
+    say([
+      ["أبو مطلق", "نم يا ولدي وارتاح. أنا وعيالي نسهر عند الباب لين يطلع الصبح.", H],
+      ["مشعل", "(أول ليلة من يوم غرّزت أنام فيها وأنا آمن…)", Me]
+    ], () => fadeTo(true, () => {
+      setTime("dawn"); fadeTo(false);
+      shot(V(-4, 2.4, 8), V(-9, 1, 2), true);
+      say([
+        ["أبو مطلق", "مطلق بيحمّلك أنت والغالية في الوانيت، ويوديكم للخط. هناك تلقى شبكة، وكلّم الشرطة على ٩٩٩.", H],
+        ["مشعل", "وش أرد لك يا أبو مطلق؟ والله ما أدري كيف أوفيك.", Me],
+        ["أبو مطلق", "ما بيننا رد. الضيف ضيف الله. واللي سويناه لك… سوّه أنت لغيرك.", H]
+      ], () => { P2.amb = null; finishPart1(); });
+    }));
+  }
+
 
   // =====================================================================
   // ------- الجزء الثاني بالأبعاد الثلاثية -------
@@ -2151,11 +2315,11 @@
   let heroSpd = 0, SET = null;
   const lookS = V(0, 0, 0);
   const CH2 = {
-    well: ["الجزء الثاني · الفصل السابع", "ليلة البير"], salem: ["الفصل الثامن", "سالم يتكلم"], market: ["الفصل التاسع", "سوق الحلال"],
+    c6: ["الفصل السادس", "الدخيل"], well: ["الجزء الثاني · الفصل السابع", "ليلة البير"], salem: ["الفصل الثامن", "سالم يتكلم"], market: ["الفصل التاسع", "سوق الحلال"],
     station: ["الفصل العاشر", "الوسيط"], highway: ["الفصل الحادي عشر", "الخط"], jail: ["الفصل الثاني عشر", "التوقيف"],
     feed: ["الفصل الثالث عشر", "الترند"], court: ["الفصل الرابع عشر", "المحكمة"], after: ["الفصل الخامس عشر", "الفزعة ترجع"], fin: ["الفصل السادس عشر · بعد سنة", "ما خلصت"]
   };
-  const START2 = { well: startWell, salem: startSalem, market: startMarket, station: startStation, highway: startHighway, jail: startJail, feed: startFeed, court: startCourt, after: startAfter, fin: startEpilogue };
+  const START2 = { c6: startCamp, well: startWell, salem: startSalem, market: startMarket, station: startStation, highway: startHighway, jail: startJail, feed: startFeed, court: startCourt, after: startAfter, fin: startEpilogue };
 
   // ------- الناس -------
   const man2 = o => makeMan(Object.assign({ jug: false }, o || {}));
@@ -3560,6 +3724,7 @@
     ], () => { const mg = put(man2(LOOK.magdy), DOOR[0], DOOR[1], Math.PI); walkIn(mg, [[0, 5], [0, -1.5]], () => say([["مجدي", "وأنا شاهد يا فضيلة القاضي. أنا اللي كنت أصب لهم القهوة… وأنا اللي قلت لمشعل ياخد باله.", () => faceShot(mg, 2.2, .5)]], verdict)); });
     const fz = path.fazaa === "yes" ? [["ذياب", "وهو بنفسه قال لأبوي «أبشروا بالفزعة»… ووعده كذب!", () => faceShot(dh, 2.2, .5)], ["المحامي", "وعدهم بفزعة على غزو ما صار أصلًا يا أصحاب الفضيلة. الكذب كان في سالفتهم، مو في وعده.", L]]
       : path.fazaa === "no" ? [["ذياب", "رفض يفزع لنا من أول… لأنه كان حاط عينه على الناقة!", () => faceShot(dh, 2.2, .5)], ["المحامي", "رفض يطلع معهم لغزو كذبة، وقال «بنتي تنتظرني». ورجع لبنته… ورجع معه الشرطة.", L]] : [];
+    if (path.camp) fz.push(["المحامي", "وعند النيابة شهادة الشيخ أبو مطلق يا أصحاب الفضيلة: ذياب جاه بالليل يطلب موكّلي، وقال له الشيخ «الشرطة والقاضي بيننا». وذياب ما قدّم بلاغه إلا بعدها بأسابيع.", L]);
     const afterCoop = () => say(fz, r4);
     const r3 = () => round("ممثل النيابة", pros, "وأبو فيصل شاهد إن المتهم باع عنده جوالات مسروقة.", photo ? "صورة الرف" : "كاميرات المحطة", [
       ["المحامي", photo ? "هذي صورة رف أبو فيصل، وفيها جوال سالم للبيع. الصورة قبل لا يوقف موكّلي عنده أصلًا." : "كاميرات المحطة يا فضيلة القاضي: موكّلي عبّى بنزين ودفع، وما باع شي.", L],
