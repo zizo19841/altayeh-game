@@ -142,7 +142,7 @@
       <div class="card">
         <div class="k" id="ov-k">الجزء الأول والثاني بالأبعاد الثلاثية</div>
         <div class="t" id="ov-t">التايه</div>
-        <div class="s" id="ov-s">آخر موسم الفقع، والسيارة غارزة في النفود، ومعك جالون مويه ما يكفي لبكرة. أنت مشعل: امشِ شمال مع الفجر، ودوّر أي أثر ينقذك.</div>
+        <div class="s" id="ov-s">بعد بكرة تخرّج نورة، وأبوها مشعل طالع يجيب فقع لعشا العزيمة من بدوي على طرف النفود… وما يدري وش ينتظره في الطريق.</div>
         <button type="button" id="ov-b">ابدأ</button>
       </div>
     </div>
@@ -1238,7 +1238,7 @@
   const SND = { mode: Math.min(2, Math.max(0, +(lsGet("altayeh3d-snd") || 0) || 0)) };
   const SND_L = ["🔊 الراوي", "🔊 الراوي والشخصيات", "🔇 صامت"];
   VO.on = SND.mode === 1;
-  const RAWI_T = {"title": "يا هلا ومسهلا! اسمعوا يا جماعة الخير، هذي سالفة صارت في النفود، ويقولون إنها صدق. رجّال تاه في بحر رمل، والعطش ينهش فيه، وبنته تنتظره عند الباب. والله ما يدري وش مخبّي له الدرب! يالله يا نشمي، شد حيلك، وخلنا نشوف معدنك!", "c1": "يقول الراوي: طلع مشعل يدوّر الفقع، والسيارة غرّزت، والشمس فوق راسه مثل الجمر. ما معه إلا جالون مويه، ونجمة الجدي. امش يا ولد، ولا تلتفت!", "half": "زين يا نشمي! نص الدرب صار ورا ظهرك. بس اسمعها مني: اللي يوقف في هالبر، البر ياكله!", "thirst": "آه يا العطش! الريق نشف، والخطوة ثقلت، والراس يدور. بس تذكّر نورة واقفة عند الباب، وكمّل!", "c2": "وبين الطعوس، شاف شي ما توقعه: ناقة طايحة، ولسانها ناشف، وحبلها مقطوع. ومويته على قده. هنا يا جماعة، يبان معدن الرجّال!", "camelup": "الله أكبر! سقاها من مويته، وقامت تنفض الرمل عنها، وبركت له تقول: اركب! هذي يا جماعة سلوم العرب، والفزعة ما تضيع!", "c3": "ومع المغرب، بانت قرية طين في آخر الدنيا، وفوانيسها تلمع. فرح مشعل، بس الراوي يقول لك: مو كل ضو يدل على خير!", "c4": "دخل المجلس، والدلال على الجمر، وريحة الهيل والبخور، وكل العيون عليه. القهوة كرم يا نشمي، بس الفنجال اللي ما تعرف صبّابه، رده بأدب!", "key": "أخذه من تحت عينه! والله إنك ذيب ما ينلحق! بس هدّ اللعب، الليل لسه طويل.", "c5": "انتصف الليل، والقرية نايمة، إلا حارس فوق البرج بكشافه. امش مثل الظل يا ولد، وخل البيوت بينك وبين الضو. الحين وقتك!", "c6": "وفي عز الليل، بانت نار بعيدة، وبيت شعر بابه مفتوح. هذي يا جماعة ديرة الكرم: الضيف فيها ضيف الله، والدخيل ما ينسلّم، لو جات الدنيا كلها تطلبه!", "flee": "طلقة! اركضي يالغالية، اركضي! القوم وراكم، والليل ستر لكم. لا تلتفتون!", "end1": "ومع الفجر، بانت أنوار الخط، ووصل التايه، ونورة واقفة عند الباب. بس اصبروا علي يا جماعة، السالفة ما خلصت، واللي جاي أكبر!", "well": "ورجعنا لليلة سودا، في قعر بير مظلم، ورجّال محبوس من شهرين. ما معه إلا فحمة وكرتون، وعين على الحارس. اكتب يا سالم، اكتب!", "salem": "الحين أنت سالم يا نشمي! والغالية هي الوحيدة اللي تعرف درب الديرة. طلّعها من المراح، ولا يلمحك الكشاف!", "market": "سوق الحلال! رغا البل، وصياح الدلالين، والزحمة تضيّع الحليم. بس عينك على الوسم يا ولد، الحق ما يضيع وسط الزحمة!", "station": "آخر محطة قبل النفود، وصاحبها يبتسم لك ابتسامة، الله أعلم وش وراها. اسأل بهدوء، وخل عيونك تشتغل قبل لسانك.", "highway": "الليل على الخط، وأنوار ذياب لاصقة في ظهرك! غيّر مسارك، وانتبه للبل السايبة. لا تخليه يلحقك يا نشمي!", "jail": "وقفوه، وقفلوا عليه الباب. بس الرجّال ما ينكسر بقفل! حقك تتصل، وحقك محامي. خلك ثابت يا مشعل!", "feed": "وجا دورك يا نورة! الترند يغلي، وفيه شهود صادقين، وفيه حسابات تدوّر بيتكم. احمي أهلك يا بنت الرجال!", "court": "ويوم الحق وصل! القاضي يسمع، والدليل يتكلم، والناس تنتظر. رتّب حجتك يا مشعل، ترى ما ضاع حق وراه مطالب!", "after": "ودارت الأيام يا جماعة، والحوار كبر، والفزعة رجعت لأهلها. حيّ الله المجالس الطيبة، وحيّ الله أهلها!", "fin": "وبعد سنة كاملة، نادت النفود من جديد. بس هالمرة يا جماعة، التايه يعرف الدرب زين!", "end2": "وهذي يا جماعة الخير سالفة مشعل: فزع لناقة طايحة، وفزعت له الدنيا كلها. والطيب ما يضيع، لو طال الزمن. وسلامتكم!", "fail1": "طحت؟ ما عليه! الذيب يطيح ويقوم. قم يا نشمي، وجرّبها مرة ثانية!", "fail2": "لا يضيق صدرك يا ولد، كل جواد له كبوة. يالله، ثانية!", "fail3": "عز الله إنك قريب! بس شوي صبر، وتطلع منها مرفوع الراس!", "fail4": "الصبر مفتاح الفرج! ركّز هالمرة، وأنا أشهد إنك قدها وقدود!", "fail5": "ما يعيب الطيحة يا جماعة، يعيب اللي ما يقوم منها. قم يا نشمي!", "star3": "ولا غلطة وحدة! هذا شغل الذيابة! ثلاث نجوم، وحلاوتها!"};
+  const RAWI_T = {"home": "قبل الحكاية بيومين: بيت مليان فرح، وبنت تجهّز روب تخرجها، وأبوها يوعدها بعشا ما ينسى. بس يا جماعة، الوعد في النفود له ثمن!", "title": "يا هلا ومسهلا! اسمعوا يا جماعة الخير، هذي سالفة صارت في النفود، ويقولون إنها صدق. رجّال تاه في بحر رمل، والعطش ينهش فيه، وبنته تنتظره عند الباب. والله ما يدري وش مخبّي له الدرب! يالله يا نشمي، شد حيلك، وخلنا نشوف معدنك!", "c1": "يقول الراوي: طلع مشعل يدوّر الفقع، والسيارة غرّزت، والشمس فوق راسه مثل الجمر. ما معه إلا جالون مويه، ونجمة الجدي. امش يا ولد، ولا تلتفت!", "half": "زين يا نشمي! نص الدرب صار ورا ظهرك. بس اسمعها مني: اللي يوقف في هالبر، البر ياكله!", "thirst": "آه يا العطش! الريق نشف، والخطوة ثقلت، والراس يدور. بس تذكّر نورة واقفة عند الباب، وكمّل!", "c2": "وبين الطعوس، شاف شي ما توقعه: ناقة طايحة، ولسانها ناشف، وحبلها مقطوع. ومويته على قده. هنا يا جماعة، يبان معدن الرجّال!", "camelup": "الله أكبر! سقاها من مويته، وقامت تنفض الرمل عنها، وبركت له تقول: اركب! هذي يا جماعة سلوم العرب، والفزعة ما تضيع!", "c3": "ومع المغرب، بانت قرية طين في آخر الدنيا، وفوانيسها تلمع. فرح مشعل، بس الراوي يقول لك: مو كل ضو يدل على خير!", "c4": "دخل المجلس، والدلال على الجمر، وريحة الهيل والبخور، وكل العيون عليه. القهوة كرم يا نشمي، بس الفنجال اللي ما تعرف صبّابه، رده بأدب!", "key": "أخذه من تحت عينه! والله إنك ذيب ما ينلحق! بس هدّ اللعب، الليل لسه طويل.", "c5": "انتصف الليل، والقرية نايمة، إلا حارس فوق البرج بكشافه. امش مثل الظل يا ولد، وخل البيوت بينك وبين الضو. الحين وقتك!", "c6": "وفي عز الليل، بانت نار بعيدة، وبيت شعر بابه مفتوح. هذي يا جماعة ديرة الكرم: الضيف فيها ضيف الله، والدخيل ما ينسلّم، لو جات الدنيا كلها تطلبه!", "flee": "طلقة! اركضي يالغالية، اركضي! القوم وراكم، والليل ستر لكم. لا تلتفتون!", "end1": "ومع الفجر، بانت أنوار الخط، ووصل التايه، ونورة واقفة عند الباب. بس اصبروا علي يا جماعة، السالفة ما خلصت، واللي جاي أكبر!", "well": "ورجعنا لليلة سودا، في قعر بير مظلم، ورجّال محبوس من شهرين. ما معه إلا فحمة وكرتون، وعين على الحارس. اكتب يا سالم، اكتب!", "salem": "الحين أنت سالم يا نشمي! والغالية هي الوحيدة اللي تعرف درب الديرة. طلّعها من المراح، ولا يلمحك الكشاف!", "market": "سوق الحلال! رغا البل، وصياح الدلالين، والزحمة تضيّع الحليم. بس عينك على الوسم يا ولد، الحق ما يضيع وسط الزحمة!", "station": "آخر محطة قبل النفود، وصاحبها يبتسم لك ابتسامة، الله أعلم وش وراها. اسأل بهدوء، وخل عيونك تشتغل قبل لسانك.", "highway": "الليل على الخط، وأنوار ذياب لاصقة في ظهرك! غيّر مسارك، وانتبه للبل السايبة. لا تخليه يلحقك يا نشمي!", "jail": "وقفوه، وقفلوا عليه الباب. بس الرجّال ما ينكسر بقفل! حقك تتصل، وحقك محامي. خلك ثابت يا مشعل!", "feed": "وجا دورك يا نورة! الترند يغلي، وفيه شهود صادقين، وفيه حسابات تدوّر بيتكم. احمي أهلك يا بنت الرجال!", "court": "ويوم الحق وصل! القاضي يسمع، والدليل يتكلم، والناس تنتظر. رتّب حجتك يا مشعل، ترى ما ضاع حق وراه مطالب!", "after": "ودارت الأيام يا جماعة، والحوار كبر، والفزعة رجعت لأهلها. حيّ الله المجالس الطيبة، وحيّ الله أهلها!", "fin": "وبعد سنة كاملة، نادت النفود من جديد. بس هالمرة يا جماعة، التايه يعرف الدرب زين!", "end2": "وهذي يا جماعة الخير سالفة مشعل: فزع لناقة طايحة، وفزعت له الدنيا كلها. والطيب ما يضيع، لو طال الزمن. وسلامتكم!", "fail1": "طحت؟ ما عليه! الذيب يطيح ويقوم. قم يا نشمي، وجرّبها مرة ثانية!", "fail2": "لا يضيق صدرك يا ولد، كل جواد له كبوة. يالله، ثانية!", "fail3": "عز الله إنك قريب! بس شوي صبر، وتطلع منها مرفوع الراس!", "fail4": "الصبر مفتاح الفرج! ركّز هالمرة، وأنا أشهد إنك قدها وقدود!", "fail5": "ما يعيب الطيحة يا جماعة، يعيب اللي ما يقوم منها. قم يا نشمي!", "star3": "ولا غلطة وحدة! هذا شغل الذيابة! ثلاث نجوم، وحلاوتها!"};
   const RAWI = { cur: null, q: [], said: {} };
   function narrate(k, now) {
     if (SND.mode === 2 || !RAWI_T[k]) return;
@@ -1321,7 +1321,7 @@
   }
 
   // ------- الفصول والنجوم -------
-  const ORDER = ["c1", "c2", "c3", "c4", "c5", "c6", "well", "salem", "market", "station", "highway", "jail", "feed", "court", "after", "fin"];
+  const ORDER = ["home", "c1", "c2", "c3", "c4", "c5", "c6", "well", "salem", "market", "station", "highway", "jail", "feed", "court", "after", "fin"];
   const CH1 = { c1: ["الفصل الأول", "التايه"], c2: ["الفصل الثاني", "الغالية"], c3: ["الفصل الثالث", "القرية"], c4: ["الفصل الرابع", "العشاء"], c5: ["الفصل الخامس", "الهروب"] };
   let PROG = { stars: {}, reach: {} };
   try { PROG = Object.assign({ stars: {}, reach: {} }, JSON.parse(lsGet("altayeh3d-prog") || "{}")); } catch (e) {}
@@ -1354,7 +1354,7 @@
     const g = document.createElement("div"); g.id = "chgrid"; g.className = "chgrid";
     let total = 0;
     ORDER.forEach((k, i) => {
-      const nm = CH1[k] || CH2[k], st = PROG.stars[k] || 0, open = k === "c1" || (!CH1[k] && (PROG.reach[k] || (k === "well" || k === "c6") && PROG.reach.c5));
+      const nm = CH1[k] || CH2[k], st = PROG.stars[k] || 0, open = k === "c1" || k === "home" || (!CH1[k] && (PROG.reach[k] || (k === "well" || k === "c6") && PROG.reach.c5));
       total += st;
       const b = document.createElement("button"); b.type = "button"; b.disabled = !open;
       b.innerHTML = "<small></small><span></span><i></i>";
@@ -1454,7 +1454,7 @@
   }
 
   const INTRO = [
-    ["مشعل", "آخر موسم الفقع… طلعت لحالي للنفود، وقلت لأهلي: «راجع قبل المغرب»."],
+    ["مشعل", "ما لقيت مخيم البدوي… والطريق الترابي ضاع تحت الرمل."],
     ["مشعل", "والسيارة غرّزت، والماطور طفى. انتظرت يوم كامل، وولّعت الكفر الاحتياطي عشان الدخان."],
     ["نورة", "(آخر رسالة قبل لا تنقطع الشبكة) يبه لا تتأخر… حفل تخرجي بعد بكرة."],
     ["مشعل", "(شلت جالون المويه، وكتبت ورقة على المراية: «مشيت شمال مع الجدي، للخط». وأمشي مع الفجر.)"],
@@ -1465,7 +1465,7 @@
   function start() {
     leavePart2();
     build(); state = "intro";
-    rawiOnce("title"); enterCh("c1");
+    enterCh("c1");
     say(INTRO.slice(0, 3), () => { state = "fix"; seq = { t: 0, step: 0, said: 0 }; });
   }
   function afterFix() {
@@ -1565,7 +1565,7 @@
   });
   addEventListener("keyup", e => { keys[e.code] = false; if (e.code === "Space") holdBtn = false; });
   addEventListener("blur", () => { for (const k in keys) keys[k] = false; endJoy(); });
-  $("ov-b").onclick = e => { e.stopPropagation(); $("ov").hidden = true; start(); };
+  $("ov-b").onclick = e => { e.stopPropagation(); $("ov").hidden = true; startHome(); };
   $("jumpb").addEventListener("pointerup", () => { holdBtn = false; });
 
   // ------- الحلقة -------
@@ -2142,7 +2142,119 @@
     }[kind];
     setPath("ate", ate); setPath("fazaa", fazaa); setPath("peek", peek); setPath("note", !!clues.note); setPath("end1", kind); setPath("clues", n);
     say(base.concat(E.lines), () => showCard("نهاية الجزء الأول", E.t,
-      E.s + " الأدلة: " + AR(n) + " من ٤ (بطاقة سالم، والقارورة، وأغراض التايهين، والمفتاح).", "كمّل: الجزء الثاني", () => goChapter(startWell), "العبها من البداية", () => { fadeTo(false); start(); }));
+      E.s + " الأدلة: " + AR(n) + " من ٤ (بطاقة سالم، والقارورة، وأغراض التايهين، والمفتاح).", "كمّل: الجزء الثاني", () => goChapter(startWell), "العبها من البداية", () => { fadeTo(false); startHome(); }));
+  }
+
+  // ------- المقدمة: البيت قبل حفل نورة -------
+  function makeHome() {
+    const g = new THREE.Group(), obs = [], rects = [];
+    const ground = (x, z) => smooth(24, 60, Math.hypot(x, z + 3)) * (duneY(x - 60, z + 90) * .5 + .6);
+    g.add(sandGround(ground, 220, 220, 0, 0, 90, 90));
+    const tile = texMat(noiseTex("#d8c9ad", ["#c9b998", "#e4d7be", "#bfae8c"], 1600), { roughness: .9 }); tile.map.repeat.set(10, 9);
+    const yard = new THREE.Mesh(new THREE.PlaneGeometry(30, 28), tile); yard.rotation.x = -Math.PI / 2; yard.position.set(0, .02, -3); yard.receiveShadow = true; g.add(yard);
+    // البيت: دورين، باب خشب، وشبابيك
+    const wallM = texMat(noiseTex("#e9dcc3", ["#dccdb0", "#f2e8d6"], 1400), { roughness: .95 }); wallM.map.repeat.set(4, 2);
+    const house = new THREE.Mesh(new THREE.BoxGeometry(14, 6.4, 7), wallM); house.position.set(0, 3.2, -13.5); house.castShadow = house.receiveShadow = true; g.add(house);
+    const trim = M("#b98d5c", { roughness: .8 });
+    const band = new THREE.Mesh(new THREE.BoxGeometry(14.2, .35, 7.2), trim); band.position.set(0, 3.2, -13.5); g.add(band);
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 2.6), M("#5a3b22", { roughness: .7 })); door.position.set(0, 1.3, -9.99); g.add(door);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 8), M("#d4a24a", { metalness: .8, roughness: .3 })); knob.position.set(.6, 1.25, -9.94); g.add(knob);
+    const lit = new THREE.MeshBasicMaterial({ color: "#f3dca8" });
+    [[-4.5, 1.7], [4.5, 1.7], [-4.5, 4.7], [0, 4.7], [4.5, 4.7]].forEach(([x, y]) => {
+      const w = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.2), lit); w.position.set(x, y, -9.98); g.add(w);
+      const f = new THREE.Mesh(new THREE.BoxGeometry(1.8, .12, .12), trim); f.position.set(x, y - .66, -9.94); g.add(f);
+    });
+    rects.push({ x1: -7.2, x2: 7.2, z1: -17.2, z2: -9.8 });
+    // سور الحوش وبوابته
+    const wM = texMat(noiseTex("#d9c6a3", ["#cbb690", "#e6d6b8"], 1200), { roughness: 1 }); wM.map.repeat.set(6, 1);
+    const wallSeg = (x1, z1, x2, z2) => {
+      const len = Math.hypot(x2 - x1, z2 - z1), m = new THREE.Mesh(new THREE.BoxGeometry(len, 2.6, .35), wM);
+      m.position.set((x1 + x2) / 2, 1.3, (z1 + z2) / 2); m.rotation.y = -Math.atan2(z2 - z1, x2 - x1); m.castShadow = m.receiveShadow = true; g.add(m);
+      rects.push({ x1: Math.min(x1, x2) - .2, x2: Math.max(x1, x2) + .2, z1: Math.min(z1, z2) - .2, z2: Math.max(z1, z2) + .2 });
+    };
+    wallSeg(-15, -17, 15, -17); wallSeg(-15, -17, -15, 11); wallSeg(15, -17, 15, 11); wallSeg(-15, 11, 1, 11); wallSeg(7, 11, 15, 11);
+    const gate = new THREE.Mesh(new THREE.BoxGeometry(6, 2.4, .12), M("#3a3a3c", { metalness: .6, roughness: .4 })); gate.position.set(4, 1.2, 11.6); gate.rotation.y = .9; g.add(gate);
+    // الجلسة: زولية ومساند ودلة
+    const carpet = new THREE.Mesh(new THREE.PlaneGeometry(5, 3.6), new THREE.MeshStandardMaterial({ map: carpetTex(), roughness: 1 })); carpet.rotation.x = -Math.PI / 2; carpet.position.set(-8, .04, -4); g.add(carpet);
+    const cush = M("#8c2424", { roughness: .9 });
+    for (let i = 0; i < 4; i++) { const k = new THREE.Mesh(new THREE.BoxGeometry(1.1, .45, .3), cush); k.position.set(-9.7 + i * 1.15, .24, -5.7); g.add(k); }
+    const pts = [[0, 0], [.12, 0], [.14, .08], [.1, .22], [.06, .3], [.09, .34], [.05, .42], [0, .44]].map(([a, b]) => new THREE.Vector2(a, b));
+    const dallah = new THREE.Mesh(new THREE.LatheGeometry(pts, 14), M("#d4a24a", { metalness: .8, roughness: .3 })); dallah.position.set(-7.3, .04, -3.4); g.add(dallah);
+    // روب التخرج على علّاقة جنب نورة
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 1.9, 6), M("#3a3a3c")); stand.position.set(-4.6, .95, -5.4); g.add(stand);
+    const gown = new THREE.Mesh(new THREE.CylinderGeometry(.2, .36, 1.1, 6), M("#15131a", { roughness: .8 })); gown.position.set(-4.6, 1.25, -5.35); g.add(gown);
+    const capB = new THREE.Mesh(new THREE.BoxGeometry(.34, .03, .34), M("#15131a")); capB.position.set(-4.6, 1.95, -5.35); capB.rotation.y = .5; g.add(capB);
+    const tas = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, .18, 4), M("#d4a24a")); tas.position.set(-4.5, 1.86, -5.25); g.add(tas);
+    obs.push({ x: -4.6, z: -5.4, r: .4, h: 2, kind: "post" });
+    // طاولة جنب الباب: الجالون ومفتاح السيارة
+    const tbl = new THREE.Mesh(new THREE.BoxGeometry(1.4, .75, .7), M("#7a5634", { roughness: .7 })); tbl.position.set(2.6, .375, -8.6); g.add(tbl);
+    rects.push({ x1: 1.9, x2: 3.3, z1: -8.95, z2: -8.25 });
+    const jug = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .42, 12), M("#e9eef2", { roughness: .4, transparent: true, opacity: .85 })); jug.position.set(2.3, .96, -8.6); g.add(jug);
+    const key = new THREE.Mesh(new THREE.BoxGeometry(.08, .02, .14), M("#222")); key.position.set(2.9, .76, -8.55); g.add(key);
+    // نخلتين في الحوش، والسيارة جاهزة عند البوابة
+    [[-12.5, 7.5], [12, -7]].forEach(([x, z]) => { const p = makePalm(); p.position.set(x, 0, z); g.add(p); obs.push({ x, z, r: .45, h: 9, kind: "tree" }); });
+    const car = makeCar({ drive: true }); car.position.set(6.5, 0, 4); car.rotation.y = Math.PI / 2; g.add(car); obs.push({ x: 6.5, z: 4, r: 2.3, h: 2, kind: "car" });
+    return { g, ground, obs, rects, bound: { x1: -14.4, x2: 14.4, z1: -16.4, z2: 10.4 }, jug, key, car };
+  }
+  function startHome() {
+    rawiOnce("title"); begin("home");
+    const H = makeHome(); useSet(H); setTime("day");
+    px = -4.2; pz = -1.6; yaw = 0; camYaw = 0; setHero({});
+    const nr = put(nora({ home: true }), -5.4, -4.4, .6), um = put(umm({ sit: true, home: true }), -8.6, -4.8, .5);
+    faceTo(nr, px, pz); faceTo(um, px, pz); faceHeroTo(nr.position.x, nr.position.z);
+    banner(...CH2.home);
+    const N = () => faceShot(nr, 1.9, .5), U = () => faceShot(um, 1.8, -.4), Me = () => faceShot(man, 2.1, -.5);
+    shot(V(-2, 3.4, 6), V(-6, 1, -4), true);
+    say([
+      ["نورة", "يبه شف! الروب وصل… بعد بكرة التخرج، وبعده عزيمتنا هنا في البيت.", N],
+      ["مشعل", "ما شاء الله تبارك الله… كبرتي يا نورة. وش ناقص للعزيمة؟", Me],
+      ["أم نورة", "الكيكة طلبناها، والورد جاهز… بس العشا. نورة تبي فقع، والسوق ما فيه إلا القديم والغالي.", U],
+      ["نورة", "أبو سعد يقول فيه بدوي يبيع فقع زبيدي جديد عند مخيمه، على طرف النفود.", N],
+      ["مشعل", "أبشري. أروح له العصر وأرجع قبل المغرب… وعشا عزيمتك عليّ.", Me],
+      ["أم نورة", "النفود ما ينأمن يا مشعل. خذ مويه زيادة، وقل لي وين رايح بالضبط.", U]
+    ], null, [
+      ["تقول لها الطريق بالتفصيل", () => { setPath("told", 1); say([
+        ["مشعل", "الطريق الترابي اللي بعد محطة الخط، شمال لين مخيم البدوي. وإذا ما رجعت المغرب، بلّغي على ٩٩٩.", Me],
+        ["أم نورة", "الله يحفظك. كذا أرتاح.", U]
+      ], () => homeWalk(H, nr, um)); }],
+      ["تطمّنها وتمشي", () => { setPath("told", 0); say([
+        ["مشعل", "لا تشيلين هم، كلها ساعتين.", Me],
+        ["أم نورة", "(تتنهّد) الله معك…", U]
+      ], () => homeWalk(H, nr, um)); }]
+    ]);
+  }
+  function homeWalk(H, nr, um) {
+    say([["تلميح", "خذ الجالون ومفتاح السيارة من الطاولة اللي جنب الباب، وبعدها روح للسيارة."]], () => {
+      P2.walk = true; cine = null; ui2({ joy: true, right: "للطاولة" });
+      let step = 0, mk = markerAt(2.6, -7.6);
+      P2.tick = dt => {
+        const r = steer(dt, 4.6, .3); heroSpd = r.spd; mk.material.opacity = .6 + Math.sin(t * 5) * .25;
+        faceTo(nr, px, pz);
+        const tx = step ? 4.4 : 2.6, tz = step ? 4 : -7.6, d = Math.hypot(px - tx, pz - tz);
+        $("left").textContent = AR(Math.round(d)) + " م";
+        if (d > 1.1) return;
+        drop(mk);
+        if (!step) {
+          step = 1; H.jug.visible = H.key.visible = false; bark("(الجالون والمفتاح… يالله.)");
+          ui2({ joy: true, right: "للسيارة" }); mk = markerAt(4.4, 4);
+        } else { P2.tick = null; P2.walk = false; homeLeave(H, nr); }
+      };
+    });
+  }
+  function homeLeave(H, nr) {
+    ui2({}); faceTo(nr, px, pz); faceHeroTo(nr.position.x, nr.position.z);
+    const N = () => faceShot(nr, 1.9, .5), Me = () => faceShot(man, 2.1, -.5);
+    say([
+      ["نورة", "يبه! …لا تتأخر، أبيك أول واحد يشوفني بالروب.", N],
+      ["مشعل", "قبل المغرب، وعد.", Me]
+    ], () => fadeTo(true, () => {
+      man.visible = false; H.car.visible = false; fadeTo(false);
+      shot(V(10, 3, 18), V(4, 1, 6), true);
+      say([
+        ["مشعل", "(عبّيت بنزين من محطة على الخط، وصاحبها سألني: «وين رايح يا الطيب؟»… ودخلت الطريق الترابي.)"],
+        ["مشعل", "(بعد ساعة… الطريق اختفى تحت الرمل، والشبكة طاحت، والسيارة غرّزت.)"]
+      ], () => fadeTo(true, () => { start(); fadeTo(false); }));
+    }));
   }
 
   // ------- الفصل السادس: الدخيل (بيت شعر في النفود، وكرم العرب مع الغريب) -------
@@ -2315,11 +2427,11 @@
   let heroSpd = 0, SET = null;
   const lookS = V(0, 0, 0);
   const CH2 = {
-    c6: ["الفصل السادس", "الدخيل"], well: ["الجزء الثاني · الفصل السابع", "ليلة البير"], salem: ["الفصل الثامن", "سالم يتكلم"], market: ["الفصل التاسع", "سوق الحلال"],
+    home: ["المقدمة", "قبل الحفل"], c6: ["الفصل السادس", "الدخيل"], well: ["الجزء الثاني · الفصل السابع", "ليلة البير"], salem: ["الفصل الثامن", "سالم يتكلم"], market: ["الفصل التاسع", "سوق الحلال"],
     station: ["الفصل العاشر", "الوسيط"], highway: ["الفصل الحادي عشر", "الخط"], jail: ["الفصل الثاني عشر", "التوقيف"],
     feed: ["الفصل الثالث عشر", "الترند"], court: ["الفصل الرابع عشر", "المحكمة"], after: ["الفصل الخامس عشر", "الفزعة ترجع"], fin: ["الفصل السادس عشر · بعد سنة", "ما خلصت"]
   };
-  const START2 = { c6: startCamp, well: startWell, salem: startSalem, market: startMarket, station: startStation, highway: startHighway, jail: startJail, feed: startFeed, court: startCourt, after: startAfter, fin: startEpilogue };
+  const START2 = { home: startHome, c6: startCamp, well: startWell, salem: startSalem, market: startMarket, station: startStation, highway: startHighway, jail: startJail, feed: startFeed, court: startCourt, after: startAfter, fin: startEpilogue };
 
   // ------- الناس -------
   const man2 = o => makeMan(Object.assign({ jug: false }, o || {}));
@@ -2346,9 +2458,9 @@
     const hood = new THREE.Mesh(new THREE.SphereGeometry(.145, 20, 14, Math.PI / 2 + .75, Math.PI * 2 - 1.5, 0, Math.PI * .8), sc); hood.position.y = .12; headG.add(hood);
     const cap = new THREE.Mesh(new THREE.SphereGeometry(.148, 20, 8, 0, Math.PI * 2, 0, Math.PI * .3), sc); cap.position.y = .12; headG.add(cap);
     const drape = new THREE.Mesh(new THREE.CylinderGeometry(.15, .25, .36, 20, 1, true), sc); drape.position.y = -.08; headG.add(drape);
-    // البرقع: يغطي الوجه، وفيه فتحتين للعيون وعصا في النص
+    // البرقع: يغطي الوجه، وفيه فتحتين للعيون وعصا في النص (في البيت قدام أهلها ما تلبسه)
     const bq = new THREE.Mesh(new THREE.SphereGeometry(.132, 20, 12, Math.PI / 2 - .9, 1.8, Math.PI * .28, Math.PI * .5), burqaMat());
-    bq.position.y = .12; headG.add(bq);
+    bq.position.y = .12; if (!o.home) headG.add(bq);
     const arm = side => {
       const piv = new THREE.Group(); piv.position.set(side * .23, 1.48, 0);
       const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(.06, .085, .6, 10), ab); sleeve.position.y = -.3; piv.add(sleeve);
@@ -2642,8 +2754,8 @@
   }
   function titleCard() {
     const saved = store.get("altayeh3d-ch"), c = saved && CH2[saved];
-    showCard("الجزء الأول والثاني بالأبعاد الثلاثية", "التايه", "آخر موسم الفقع، والسيارة غارزة في النفود، ومعك جالون مويه ما يكفي لبكرة. أنت مشعل: امشِ شمال مع الفجر، ودوّر أي أثر ينقذك.",
-      "ابدأ من الأول", start, c ? "كمّل: " + c[0].replace("الجزء الثاني · ", "") + " · " + c[1] : "الجزء الثاني", () => goChapter(START2[c ? saved : "well"]));
+    showCard("الجزء الأول والثاني بالأبعاد الثلاثية", "التايه", "بعد بكرة تخرّج نورة، وأبوها مشعل طالع يجيب فقع لعشا العزيمة من بدوي على طرف النفود… وما يدري وش ينتظره في الطريق.",
+      "ابدأ من الأول", startHome, c ? "كمّل: " + c[0].replace("الجزء الثاني · ", "") + " · " + c[1] : "الجزء الثاني", () => goChapter(START2[c ? saved : "well"]));
     const b = document.createElement("button"); b.type = "button"; b.id = "ov-b3"; b.textContent = "الفصول والنجوم ★";
     b.style.background = "transparent"; b.style.color = "var(--saffron)"; b.style.border = "1px solid var(--saffron)";
     b.onclick = e => { e.stopPropagation(); chapterMenu(); };
